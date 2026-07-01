@@ -1,7 +1,13 @@
 const usersRepository = require("../repositories/users.repository");
 
 const getUsers = async () => {
-    return await usersRepository.findAll();
+    console.log("SERVICE HIT");
+
+    const data = await usersRepository.findAll();
+
+    console.log("SERVICE DATA:", data);
+
+    return data;
 };
 
 const getUserById = async (id) => {

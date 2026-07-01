@@ -1,7 +1,12 @@
 const usersService = require("../services/users.service");
 
 const getUsers = async (req, res) => {
+    console.log("CONTROLLER HIT");
+
     const users = await usersService.getUsers();
+
+    console.log("USERS RAW:", users);
+
     res.json({ success: true, data: users });
 };
 
