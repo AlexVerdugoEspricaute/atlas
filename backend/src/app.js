@@ -2,7 +2,7 @@ const express = require("express");
 const cors = require("cors");
 require("dotenv").config();
 const supabase = require("./config/supabase");
-
+const meRoutes = require("./routes/me.routes");
 
 // Modules
 const usersRoutes = require("./modules/users");
@@ -15,6 +15,7 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
+app.use("/api", meRoutes)
 // ======================
 // ROUTES
 // ======================
