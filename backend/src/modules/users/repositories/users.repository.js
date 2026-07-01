@@ -2,7 +2,6 @@ const supabase = require("../../../config/supabase");
 
 // GET ALL USERS
 const findAll = async () => {
-    console.log("REPOSITORY HIT");
 
     const { data, error } = await supabase
         .from("users")
@@ -11,9 +10,6 @@ const findAll = async () => {
             roles (*),
             areas (*)
         `);
-
-    console.log("SUPABASE RAW DATA:", data);
-    console.log("SUPABASE ERROR:", error);
 
     if (error) throw error;
 
