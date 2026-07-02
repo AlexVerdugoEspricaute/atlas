@@ -72,9 +72,35 @@ const remove = async (id) => {
     return true;
 };
 
+// FIND BY EMAIL
+const findByEmail = async (email) => {
+    const { data, error } = await supabase
+        .from("users")
+        .select("*, roles (*), areas (*)")
+        .eq("email", email)
+        .maybeSingle();
+
+    if (error) throw error;
+    return data;
+};
+
+// FIND BY ENTRA ID
+const findByEntraId = async (entraId) => {
+    const { data, error } = await supabase
+        .from("users")
+        .select("*, roles (*), areas (*)")
+        .eq("entra_id", entraId)
+        .maybeSingle();
+
+    if (error) throw error;
+    return data;
+};
+
 module.exports = {
     findAll,
     findById,
+    findByEmail,
+    findByEntraId,
     create,
     update,
     remove,

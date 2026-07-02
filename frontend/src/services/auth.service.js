@@ -1,19 +1,39 @@
-export const fetchMe = async (token) => {
+const API = "http://localhost:3000/api/auth";
 
-    const response = await fetch("http://localhost:3000/api/auth/me", {
-
-        method: "GET",
-
-        headers: {
-            Authorization: `Bearer ${token}`
-        }
-
+export const loginWithMicrosoft = async (id_token) => {
+    const res = await fetch(`${API}/login`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ type: "microsoft", id_token }),
     });
+    if (!res.ok) throw await res.json();
+    return res.json();
+};
 
-    if (!response.ok) {
-        const error = await response.json();
-        throw error;
-    }
+export const loginWithCredentials = async (email, password) => {
+    const res = await fetch(`${API}/login`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ type: "local", email, password }),
+    });
+    if (!res.ok) throw await res.json();
+    return res.json();
+};
 
-    return await response.json();
+export const registerUser = async ({ email, password, first_name, last_name }) => {
+    const res = await fetch(`${API}/register`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password, first_name, last_name }),
+    });
+    if (!res.ok) throw await res.json();
+    return res.json();
+};
+
+export const fetchMe = async (token) => {
+    const res = await fetch(`${API}/me`, {
+        headers: { Authorization: `Bearer ${token}` },
+    });
+    if (!res.ok) throw await res.json();
+    return res.json();
 };

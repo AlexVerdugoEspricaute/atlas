@@ -1,18 +1,13 @@
-import MainLayout from "@/layouts/MainLayout";
-import LoginButton from "@/components/auth/LoginButton";
+import { BrowserRouter } from "react-router-dom";
 import AuthHandler from "@/components/auth/AuthHandler";
-import { Typography } from "@mui/material";
+import AppRouter from "@/routes/AppRouter";
 
 function App() {
     return (
-        <MainLayout>
+        <BrowserRouter>
             <AuthHandler />
-            <Typography variant="h4">
-                Atlas Auth Test
-            </Typography>
-
-            <LoginButton />
-        </MainLayout>
+            <AppRouter />
+        </BrowserRouter>
     );
 }
 
