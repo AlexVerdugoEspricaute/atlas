@@ -1,4 +1,4 @@
-const API = "http://localhost:3000/api/auth";
+const API = "https://atlas-backend-sepia.vercel.app/api/auth";
 
 export const loginWithMicrosoft = async (id_token) => {
     const res = await fetch(`${API}/login`, {
@@ -6,6 +6,7 @@ export const loginWithMicrosoft = async (id_token) => {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ type: "microsoft", id_token }),
     });
+
     if (!res.ok) throw await res.json();
     return res.json();
 };
@@ -16,6 +17,7 @@ export const loginWithCredentials = async (email, password) => {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ type: "local", email, password }),
     });
+
     if (!res.ok) throw await res.json();
     return res.json();
 };
@@ -26,6 +28,7 @@ export const registerUser = async ({ email, password, first_name, last_name }) =
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password, first_name, last_name }),
     });
+
     if (!res.ok) throw await res.json();
     return res.json();
 };
@@ -34,6 +37,7 @@ export const fetchMe = async (token) => {
     const res = await fetch(`${API}/me`, {
         headers: { Authorization: `Bearer ${token}` },
     });
+
     if (!res.ok) throw await res.json();
     return res.json();
 };
