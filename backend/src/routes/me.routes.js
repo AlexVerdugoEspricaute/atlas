@@ -1,17 +1,23 @@
-const router = require("express").Router()
+const router = require("express").Router();
 
-const authMiddleware = require("../middlewares/auth.middleware")
-const userSyncMiddleware = require("../middlewares/userSync.middleware")
+const authMiddleware = require("../middlewares/auth.middleware");
+const userSyncMiddleware = require("../middlewares/userSync.middleware");
+const { generateToken } = require("../auth/jwt.service");
 
-router.get("/me",
+router.get(
+    "/me",
     authMiddleware,
     userSyncMiddleware,
     (req, res) => {
-        res.json({
-            azure: req.user,
-            db: req.dbUser
-        })
-    }
-)
 
-module.exports = router
+        const token = generateToken(req.dbUser);
+
+        res.json({
+            token,
+            user: req.dbUser
+        });
+
+    }
+);
+
+module.exports = router;
