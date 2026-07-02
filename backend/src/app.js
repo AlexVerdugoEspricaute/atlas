@@ -12,8 +12,18 @@ const app = express();
 // ======================
 // MIDDLEWARES
 // ======================
-app.use(cors());
+app.use(cors({
+    origin: "http://localhost:5173",
+    credentials: true,
+    allowedHeaders: ["Content-Type", "Authorization"]
+}));
 app.use(express.json());
+
+app.use((req, res, next) => {
+    console.log(`[${req.method}] ${req.path}`);
+    console.log("[HEADERS]", req.headers);
+    next();
+});
 
 app.use("/api", meRoutes)
 // ======================
