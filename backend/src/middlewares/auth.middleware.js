@@ -1,5 +1,4 @@
 const jwt = require("jsonwebtoken");
-const jwksClient = require("jwks-rsa");
 
 const jwksClients = { v1: null, v2: null };
 function detectAzureVersion(token) {

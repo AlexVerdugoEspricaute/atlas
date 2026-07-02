@@ -1,5 +1,5 @@
 const jwt = require("jsonwebtoken");
-const jwksClient = require("jwks-rsa");
+
 
 // Cache de clientes JWKS por versión de Azure AD
 const jwksClients = {};
