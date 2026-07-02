@@ -1,4 +1,4 @@
-const API = "https://atlas-backend-sepia.vercel.app/api/auth";
+const API = "https://atlas-backend-sepia.vercel.app";
 
 export const loginWithMicrosoft = async (id_token) => {
     const res = await fetch(`${API}/login`, {
