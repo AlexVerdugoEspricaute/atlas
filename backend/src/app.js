@@ -8,10 +8,18 @@ const usersRoutes = require("./modules/users");
 const app = express();
 
 app.use(cors({
-    origin: [
+    origin: function (origin, callback) {
+    const allowed = [
         "http://localhost:5173",
         process.env.FRONTEND_URL
-    ],
+    ];
+
+    if (!origin || allowed.includes(origin)) {
+        callback(null, true);
+    } else {
+        callback(new Error("Not allowed by CORS"));
+    }
+},
     credentials: true,
     allowedHeaders: ["Content-Type", "Authorization"]
 }));
