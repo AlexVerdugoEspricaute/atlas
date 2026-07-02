@@ -7,39 +7,26 @@ const usersRoutes = require("./modules/users");
 
 const app = express();
 
-const allowedOrigins = [
-    "http://localhost:5173",
-    process.env.FRONTEND_URL
-];
-
 app.use(cors({
-    origin(origin, callback) {
-        if (!origin) return callback(null, true);
-
-        if (allowedOrigins.includes(origin)) {
-            return callback(null, true);
-        }
-
-        return callback(new Error("CORS not allowed"));
-    },
-    credentials: true
+    origin: process.env.FRONTEND_URL,
+    credentials: true,
+    allowedHeaders: ["Content-Type", "Authorization"]
 }));
 
 app.use(express.json());
 
+// LOGS
 app.use((req, res, next) => {
     console.log(`[${req.method}] ${req.path}`);
     next();
 });
 
+// ROUTES
 app.use("/api/auth", authRoutes);
-
 app.use("/api/v1/users", usersRoutes);
 
 app.get("/health", (req, res) => {
-    res.json({
-        status: "ok"
-    });
+    res.json({ status: "ok" });
 });
 
 module.exports = app;
