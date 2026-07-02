@@ -18,9 +18,6 @@ const AuthHandler = () => {
 
                 const idToken = response.idToken;
 
-                console.log("[AUTH_HANDLER] ID TOKEN:", idToken);
-
-                // enviar al backend
                 const backendResponse = await fetch("http://localhost:3000/api/auth/login", {
                     method: "POST",
                     headers: {
@@ -33,18 +30,11 @@ const AuthHandler = () => {
 
                 const data = await backendResponse.json();
 
-                console.log("[AUTH_HANDLER] Backend response:", data);
-
-                // guardar sesión Atlas
                 localStorage.setItem("atlas_token", data.token);
                 localStorage.setItem("user", JSON.stringify(data.user));
 
-                // usar sesión Atlas
                 const user = await fetchMe(data.token);
 
-                console.log("[AUTH_HANDLER] User:", user);
-
-                console.log("[AUTH_HANDLER] Backend response:", user);
             } catch (err) {
                 console.error("[AUTH_HANDLER]", err);
             }

@@ -1,21 +1,28 @@
 const express = require("express");
 const router = express.Router();
-const auth = require("../../../middlewares/auth.middleware");
+
+const jwtMiddleware = require("../../../auth/jwt.middleware");
 const usersController = require("../controllers/users.controller");
 
-// GET ALL
-router.get("/", auth, usersController.getUsers);
+// GET ALL (protegido)
+router.get("/", jwtMiddleware, (req, res) => {
+    return res.json({
+        user: req.user
+    });
+});
 
 // GET BY ID
-router.get("/:id", auth, usersController.getUserById);
+router.get("/:id", jwtMiddleware, usersController.getUserById);
 
 // CREATE
-router.post("/", auth, usersController.createUser);
+router.post("/", jwtMiddleware, usersController.createUser);
 
 // UPDATE
-router.put("/:id", auth, usersController.updateUser);
+router.put("/:id", jwtMiddleware, usersController.updateUser);
 
 // DELETE
-router.delete("/:id", auth, usersController.deleteUser);
+router.delete("/:id", jwtMiddleware, usersController.deleteUser);
+
+
 
 module.exports = router;

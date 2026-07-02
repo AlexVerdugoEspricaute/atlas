@@ -1,71 +1,40 @@
 const express = require("express");
 const cors = require("cors");
 require("dotenv").config();
-const supabase = require("./config/supabase");
-const meRoutes = require("./routes/me.routes");
 
-// Modules
+const meRoutes = require("./routes/me.routes");
+const authRoutes = require("./modules/auth/routes/auth.routes");
+
 const usersRoutes = require("./modules/users");
 
 const app = express();
 
-// ======================
-// MIDDLEWARES
-// ======================
 app.use(cors({
     origin: "http://localhost:5173",
     credentials: true,
     allowedHeaders: ["Content-Type", "Authorization"]
 }));
+
 app.use(express.json());
 
+// LOGS
 app.use((req, res, next) => {
     console.log(`[${req.method}] ${req.path}`);
-    console.log("[HEADERS]", req.headers);
     next();
 });
 
-app.use("/api", meRoutes)
-// ======================
-// ROUTES
-// ======================
+// ❌ ESTO ESTABA MAL / INCOMPLETO
+// app.use("/api", meRoutes)
+
+// AUTH
+app.use("/api/auth", authRoutes);
+
+// USERS
 app.use("/api/v1/users", usersRoutes);
 
-// ======================
-// HEALTH CHECK
-// ======================
+// HEALTH
 app.get("/health", (req, res) => {
-    return res.json({
-        status: "ok",
-        service: "Atlas API",
-        timestamp: new Date().toISOString()
-    });
-});
-
-app.get("/health/db", async (req, res) => {
-    try {
-        const { error } = await supabase
-            .from("users")
-            .select("id")
-            .limit(1);
-
-        if (error) {
-            return res.status(500).json({
-                success: false,
-                message: error.message,
-            });
-        }
-
-        return res.json({
-            success: true,
-            message: "Supabase connection successful",
-        });
-    } catch (err) {
-        return res.status(500).json({
-            success: false,
-            message: err.message,
-        });
-    }
+    res.json({ status: "ok" });
 });
 
 module.exports = app;

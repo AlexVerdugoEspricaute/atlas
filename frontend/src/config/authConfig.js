@@ -15,9 +15,8 @@ export const msalConfig = {
     },
     system: {
         loggerOptions: {
-            loggerCallback: (level, message) => {
-                console.log("[MSAL]", message);
-            },
+            logLevel: "Error", // en vez de Info
+            piiLoggingEnabled: false
         },
     },
 };
