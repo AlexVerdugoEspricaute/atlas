@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { Box, Button, IconButton, Typography } from "@mui/material";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
-import loginHeart from "../components/auth/LoginHeader";
 import SplitBackground from "@/components/layout/SplitBackground";
 import LoginHeader from "@/components/auth/LoginHeader";
 import LoginButton from "@/components/auth/LoginButton";
@@ -11,7 +10,7 @@ import SecureFooter from "@/components/auth/SecureFooter";
 
 const FACE_SX = {
     width: "100%",
-    p: 4,
+    p: { xs: 2.5, sm: 4 },
     borderRadius: 4,
     backgroundColor: "rgba(255, 255, 255, 0.96)",
     backdropFilter: "blur(10px)",
@@ -32,16 +31,24 @@ export default function LoginPage() {
     const [flipped, setFlipped] = useState(false);
     const [tab, setTab] = useState(0);
 
-    const handleFlip = (t) => { setTab(t); setFlipped(true); };
+    // Mantenemos la lógica de negocio pura: el giro solo altera el estado sin disparar alertas intrusivas
+    const handleFlip = (t) => { 
+        setTab(t); 
+        setFlipped(true); 
+    };
 
     return (
         <SplitBackground>
-            <Box sx={{ perspective: "1200px", width: "100%", maxWidth: 420 }}>
+            <Box sx={{ perspective: "1200px", width: "100%", maxWidth: 420, px: { xs: 2, sm: 0 } }}>
                 <Box
                     sx={{
                         position: "relative",
                         width: "100%",
-                        height: flipped ? (tab === 1 ? 610 : 530) : 400,
+                        height: flipped
+                            ? (tab === 1
+                                ? { xs: 720, sm: 640, md: 610 }
+                                : { xs: 600, sm: 560, md: 530 })
+                            : { xs: 430, sm: 410, md: 400 },
                         transformStyle: "preserve-3d",
                         transition:
                             "transform 0.65s cubic-bezier(0.4, 0, 0.2, 1), height 0.35s ease",

@@ -11,7 +11,7 @@ const login = async (req, res) => {
 
         if (isMicrosoft) {
             if (!id_token) {
-                return res.status(400).json({ message: "id_token required" });
+                return res.status(400).json({ message: "Se requiere el token de Microsoft" });
             }
 
             let decoded;
@@ -20,7 +20,7 @@ const login = async (req, res) => {
                 decoded = await azureService.validateAzureToken(id_token);
             } catch (err) {
                 return res.status(401).json({
-                    message: "Invalid Azure token"
+                    message: "Token de Microsoft inválido"
                 });
             }
 
@@ -38,13 +38,13 @@ const login = async (req, res) => {
 
         if (isLocal) {
             if (!email || !password) {
-                return res.status(400).json({ message: "email and password required" });
+                return res.status(400).json({ message: "El email y la contraseña son requeridos" });
             }
 
             const dbUser = await usersService.loginWithCredentials(email, password);
 
             if (!dbUser) {
-                return res.status(401).json({ message: "Invalid credentials" });
+                return res.status(401).json({ message: "Credenciales incorrectas" });
             }
 
             const token = jwtService.generateToken(dbUser);
@@ -52,10 +52,10 @@ const login = async (req, res) => {
             return res.json({ token, user: dbUser });
         }
 
-        return res.status(400).json({ message: "Invalid login type" });
+        return res.status(400).json({ message: "Tipo de login no válido" });
 
     } catch (error) {
-        return res.status(500).json({ message: "Login error" });
+        return res.status(500).json({ message: "Error al iniciar sesión" });
     }
 };
 
@@ -64,12 +64,12 @@ const register = async (req, res) => {
         const { email, password, first_name, last_name } = req.body;
 
         if (!email || !password || !first_name || !last_name) {
-            return res.status(400).json({ message: "Missing fields" });
+            return res.status(400).json({ message: "Todos los campos son requeridos" });
         }
 
         const existing = await usersService.findByEmail(email);
         if (existing) {
-            return res.status(409).json({ message: "Email already exists" });
+            return res.status(409).json({ message: "El email ya está registrado" });
         }
 
         const newUser = await usersService.registerLocalUser({
@@ -84,7 +84,7 @@ const register = async (req, res) => {
         return res.status(201).json({ token, user: newUser });
 
     } catch (error) {
-        return res.status(500).json({ message: "Register error" });
+        return res.status(500).json({ message: "Error al crear la cuenta" });
     }
 };
 
