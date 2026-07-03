@@ -1,38 +1,20 @@
-import { Box, Button, Chip, Typography } from "@mui/material";
-import { useMsal } from "@azure/msal-react";
-import { useAuth } from "@/store/AuthContext";
+import { Box } from "@mui/material";
+import MainLayout from "@/layouts/MainLayout";
+import WelcomeCard from "@/components/dashboard/WelcomeCard";
+import StatsCards from "@/components/dashboard/StatsCards";
+import QuickActions from "@/components/dashboard/QuickActions";
+import ActivityTimeline from "@/components/dashboard/ActivityTimeline";
 
 export default function Dashboard() {
-    const { user, logout } = useAuth();
-    const { instance } = useMsal();
-
-    const handleLogout = () => {
-        logout();
-        const accounts = instance.getAllAccounts();
-        if (accounts.length > 0) {
-            instance.logoutRedirect({ account: accounts[0] });
-        }
-    };
-
     return (
-        <Box sx={{ p: 4 }}>
-            <Typography variant="h4" fontWeight={700} mb={1}>
-                Bienvenido, {user?.first_name}
-            </Typography>
-            <Typography variant="body2" color="text.secondary" mb={2}>
-                {user?.email}
-            </Typography>
-            <Chip
-                label={user?.provider === "microsoft" ? "Microsoft" : "Local"}
-                color={user?.provider === "microsoft" ? "primary" : "default"}
-                size="small"
-                sx={{ mb: 3 }}
-            />
-            <Box>
-                <Button variant="outlined" color="error" onClick={handleLogout}>
-                    Cerrar sesión
-                </Button>
+        <MainLayout>
+            <WelcomeCard />
+            <StatsCards />
+            <Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr", md: "1fr 1fr" }, gap: 2 }}>
+                <QuickActions />
+                <ActivityTimeline />
             </Box>
-        </Box>
+        </MainLayout>
     );
 }
+

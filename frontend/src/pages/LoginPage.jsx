@@ -1,272 +1,151 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { useMsal } from "@azure/msal-react";
-import {
-    Alert,
-    Box,
-    Button,
-    CircularProgress,
-    Divider,
-    Tab,
-    Tabs,
-    TextField,
-    Typography,
-} from "@mui/material";
+import { Box, Button, IconButton, Typography } from "@mui/material";
+import ArrowBackIcon from "@mui/icons-material/ArrowBack";
+import loginHeart from "../components/auth/LoginHeader";
+import SplitBackground from "@/components/layout/SplitBackground";
+import LoginHeader from "@/components/auth/LoginHeader";
+import LoginButton from "@/components/auth/LoginButton";
+import MicrosoftDivider from "@/components/auth/MicrosoftDivider";
+import LocalLoginForm from "@/components/auth/LocalLoginForm";
+import SecureFooter from "@/components/auth/SecureFooter";
 
-import { loginRequest } from "@/config/authConfig";
-import { loginWithCredentials, registerUser } from "@/services/auth.service";
-import { useAuth } from "@/store/AuthContext";
+const FACE_SX = {
+    width: "100%",
+    p: 4,
+    borderRadius: 4,
+    backgroundColor: "rgba(255, 255, 255, 0.96)",
+    backdropFilter: "blur(10px)",
+    boxShadow: "0 25px 70px rgba(0,0,0,0.15)",
+    border: "1px solid rgba(0,0,0,0.05)",
+    display: "flex",
+    flexDirection: "column",
+    alignItems: "center",
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    backfaceVisibility: "hidden",
+    WebkitBackfaceVisibility: "hidden",
+};
 
 export default function LoginPage() {
-    const { instance, inProgress, accounts } = useMsal();
-    const { login, authError, setAuthError } = useAuth();
-    const navigate = useNavigate();
-
+    const [flipped, setFlipped] = useState(false);
     const [tab, setTab] = useState(0);
-    const [form, setForm] = useState({
-        email: "",
-        password: "",
-        first_name: "",
-        last_name: ""
-    });
 
-    const [error, setError] = useState("");
-    const [loading, setLoading] = useState(false);
-
-    const handleChange = (e) => {
-        setForm((prev) => ({ ...prev, [e.target.name]: e.target.value }));
-        setError("");
-        setAuthError("");
-    };
-
-    const handleLocalLogin = async (e) => {
-        e.preventDefault();
-        setLoading(true);
-        try {
-            const { token, user } = await loginWithCredentials(form.email, form.password);
-            login(token, user);
-            navigate("/", { replace: true });
-        } catch (err) {
-            setError(err?.message || "Credenciales incorrectas");
-        } finally {
-            setLoading(false);
-        }
-    };
-
-    const handleRegister = async (e) => {
-        e.preventDefault();
-        setLoading(true);
-        try {
-            const { token, user } = await registerUser(form);
-            login(token, user);
-            navigate("/", { replace: true });
-        } catch (err) {
-            setError(err?.message || "Error al registrarse");
-        } finally {
-            setLoading(false);
-        }
-    };
+    const handleFlip = (t) => { setTab(t); setFlipped(true); };
 
     return (
-        <Box
-            sx={{
-                minHeight: "100vh",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                position: "relative",
-                overflow: "hidden",
-                backgroundColor: "#fafafa",
-            }}
-        >
-            {/* Fondo curvo */}
-            <Box
-                sx={{
-                    position: "absolute",
-                    inset: 0,
-                    zIndex: -1,
-                    background: "linear-gradient(135deg, #e8f5e9 40%, #fafafa 40%)",
-                    clipPath: "ellipse(75% 60% at 20% 20%)",
-                }}
-            />
-
-            {/* Card login */}
-            <Box
-                sx={{
-                    width: "100%",
-                    maxWidth: 420,
-                    p: 4,
-                    borderRadius: 4,
-                    backdropFilter: "blur(12px)",
-                    backgroundColor: "rgba(255,255,255,0.85)",
-                    boxShadow: "0 20px 60px rgba(0,0,0,0.12)",
-                    border: "1px solid rgba(0,0,0,0.05)",
-                }}
-            >
-                {/* Logo */}
-                <Typography
-                    variant="h4"
-                    fontWeight={800}
+        <SplitBackground>
+            <Box sx={{ perspective: "1200px", width: "100%", maxWidth: 420 }}>
+                <Box
                     sx={{
-                        textAlign: "center",
-                        mb: 3,
-                        background: "linear-gradient(90deg, #2e7d32, #66bb6a)",
-                        WebkitBackgroundClip: "text",
-                        WebkitTextFillColor: "transparent",
+                        position: "relative",
+                        width: "100%",
+                        height: flipped ? (tab === 1 ? 610 : 530) : 400,
+                        transformStyle: "preserve-3d",
+                        transition:
+                            "transform 0.65s cubic-bezier(0.4, 0, 0.2, 1), height 0.35s ease",
+                        transform: flipped ? "rotateY(180deg)" : "rotateY(0deg)",
                     }}
                 >
-                    Atlas
-                </Typography>
+                    {/* ── CARA FRONTAL ── */}
+                    <Box sx={FACE_SX}>
+                        <LoginHeader />
 
-                {/* Microsoft login */}
-                <Button
-                    fullWidth
-                    variant="outlined"
-                    onClick={async () => {
-                        try {
-                            await instance.loginRedirect({
-                                ...loginRequest,
-                                prompt: "select_account",
-                            });
-                        } catch (err) {
-                            setAuthError(err.message || "Error login Microsoft");
-                        }
-                    }}
-                    sx={{
-                        mb: 2,
-                        py: 1.2,
-                        borderRadius: 2,
-                        textTransform: "none",
-                        fontWeight: 600,
-                        borderColor: "#2e7d32",
-                        color: "#2e7d32",
-                        "&:hover": {
-                            backgroundColor: "rgba(46,125,50,0.08)",
-                            borderColor: "#2e7d32",
-                        },
-                    }}
-                >
-                    Iniciar sesión con Microsoft
-                </Button>
+                        <Box sx={{ width: "100%" }}>
+                            <LoginButton />
+                        </Box>
 
-                <Divider sx={{ mb: 2 }}>
-                    <Typography variant="caption" color="text.secondary">
-                        o continúa con email
-                    </Typography>
-                </Divider>
+                        <MicrosoftDivider />
 
-                {/* Tabs */}
-                <Tabs
-                    value={tab}
-                    onChange={(_, v) => {
-                        setTab(v);
-                        setError("");
-                        setAuthError("");
-                    }}
-                    variant="fullWidth"
-                    sx={{ mb: 2 }}
-                >
-                    <Tab label="Iniciar sesión" />
-                    <Tab label="Registrarse" />
-                </Tabs>
+                        <Box sx={{ display: "flex", gap: 2, width: "100%", mt: 0.5 }}>
+                            <Button
+                                fullWidth
+                                variant="outlined"
+                                onClick={() => handleFlip(0)}
+                                sx={{
+                                    py: 1.2,
+                                    borderRadius: 2,
+                                    textTransform: "none",
+                                    fontWeight: 600,
+                                    fontSize: "0.9rem",
+                                    borderColor: "#6E0D25",
+                                    color: "#6E0D25",
+                                    "&:hover": {
+                                        borderColor: "#5A0B1F",
+                                        backgroundColor: "rgba(110,13,37,0.05)",
+                                    },
+                                }}
+                            >
+                                Iniciar sesión
+                            </Button>
 
-                {/* Error */}
-                {(error || authError) && (
-                    <Alert severity="error" sx={{ mb: 2 }}>
-                        {error || authError}
-                    </Alert>
-                )}
+                            <Button
+                                fullWidth
+                                variant="contained"
+                                onClick={() => handleFlip(1)}
+                                sx={{
+                                    py: 1.2,
+                                    borderRadius: 2,
+                                    textTransform: "none",
+                                    fontWeight: 600,
+                                    fontSize: "0.9rem",
+                                    bgcolor: "#6E0D25",
+                                    "&:hover": { bgcolor: "#5A0B1F" },
+                                }}
+                            >
+                                Registrarse
+                            </Button>
+                        </Box>
 
-                {/* LOGIN */}
-                {tab === 0 && (
-                    <Box component="form" onSubmit={handleLocalLogin}>
-                        <TextField
-                            fullWidth
-                            label="Email"
-                            name="email"
-                            type="email"
-                            value={form.email}
-                            onChange={handleChange}
-                            margin="dense"
-                            required
-                        />
-                        <TextField
-                            fullWidth
-                            label="Contraseña"
-                            name="password"
-                            type="password"
-                            value={form.password}
-                            onChange={handleChange}
-                            margin="dense"
-                            required
-                        />
-
-                        <Button
-                            fullWidth
-                            variant="contained"
-                            type="submit"
-                            sx={{ mt: 2, borderRadius: 2 }}
-                            disabled={loading}
-                        >
-                            {loading ? <CircularProgress size={22} /> : "Entrar"}
-                        </Button>
+                        <SecureFooter />
                     </Box>
-                )}
 
-                {/* REGISTER */}
-                {tab === 1 && (
-                    <Box component="form" onSubmit={handleRegister}>
-                        <TextField
-                            fullWidth
-                            label="Nombre"
-                            name="first_name"
-                            value={form.first_name}
-                            onChange={handleChange}
-                            margin="dense"
-                            required
-                        />
-                        <TextField
-                            fullWidth
-                            label="Apellido"
-                            name="last_name"
-                            value={form.last_name}
-                            onChange={handleChange}
-                            margin="dense"
-                            required
-                        />
-                        <TextField
-                            fullWidth
-                            label="Email"
-                            name="email"
-                            type="email"
-                            value={form.email}
-                            onChange={handleChange}
-                            margin="dense"
-                            required
-                        />
-                        <TextField
-                            fullWidth
-                            label="Contraseña"
-                            name="password"
-                            type="password"
-                            value={form.password}
-                            onChange={handleChange}
-                            margin="dense"
-                            required
-                        />
+                    {/* ── CARA TRASERA ── */}
+                    <Box
+                        sx={{
+                            ...FACE_SX,
+                            alignItems: "flex-start",
+                            transform: "rotateY(180deg)",
+                        }}
+                    >
+                        <Box sx={{ width: "100%", display: "flex", justifyContent: "center", mb: 1 }}>
+                            <LoginHeader />
+                        </Box>
 
-                        <Button
-                            fullWidth
-                            variant="contained"
-                            type="submit"
-                            sx={{ mt: 2, borderRadius: 2 }}
-                            disabled={loading}
+                        <Box
+                            sx={{
+                                display: "flex",
+                                alignItems: "center",
+                                width: "100%",
+                                mb: 0.5,
+                            }}
                         >
-                            {loading ? <CircularProgress size={22} /> : "Crear cuenta"}
-                        </Button>
+                            <IconButton
+                                onClick={() => setFlipped(false)}
+                                size="small"
+                                sx={{ color: "#6E0D25", mr: 1 }}
+                            >
+                                <ArrowBackIcon fontSize="small" />
+                            </IconButton>
+
+                            <Typography
+                                variant="h6"
+                                fontWeight={700}
+                                sx={{ fontFamily: "system-ui, Segoe UI, sans-serif" }}
+                            >
+                                {tab === 0 ? "Iniciar sesión" : "Crear cuenta"}
+                            </Typography>
+                        </Box>
+
+                        <Box sx={{ width: "100%" }}>
+                            <LocalLoginForm tab={tab} />
+                        </Box>
+
+                        <SecureFooter />
                     </Box>
-                )}
+                </Box>
             </Box>
-        </Box>
+        </SplitBackground>
     );
 }
