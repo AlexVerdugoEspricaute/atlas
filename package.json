@@ -17,5 +17,8 @@
   "bugs": {
     "url": "https://github.com/AlexVerdugoEspricaute/atlas/issues"
   },
-  "homepage": "https://github.com/AlexVerdugoEspricaute/atlas#readme"
+  "homepage": "https://github.com/AlexVerdugoEspricaute/atlas#readme",
+  "dependencies": {
+    "jose": "^4.15.9"
+  }
 }
