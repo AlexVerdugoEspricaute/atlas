@@ -1,0 +1,21 @@
+{
+  "name": "atlas",
+  "version": "1.0.0",
+  "description": "Atlas is a modern, scalable enterprise management platform designed to centralize internal business operations such as user administration, document management, role-based access control, and administrative dashboards.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/AlexVerdugoEspricaute/atlas.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/AlexVerdugoEspricaute/atlas/issues"
+  },
+  "homepage": "https://github.com/AlexVerdugoEspricaute/atlas#readme"
+}
