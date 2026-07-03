@@ -10,7 +10,7 @@ const JWKS = createRemoteJWKSet(
 const validateAzureToken = async (token) => {
     const { payload } = await jwtVerify(token, JWKS, {
         issuer: `https://login.microsoftonline.com/${tenantId}/v2.0`,
-        audience: clientId,
+        audience: clientId
     });
 
     return payload;
