@@ -9,6 +9,7 @@ import { inputSx } from "../../styles/inputStyles";
 import { useNavigate } from "react-router-dom";
 import { loginWithCredentials, registerUser } from "@/services/auth.service";
 import { useAuth } from "@/store/AuthContext";
+import { loginSchema, registerSchema } from "@/validations/auth.validation";
 import { 
     showSuccessToast, 
     showErrorToast, 
@@ -21,6 +22,9 @@ export default function LocalLoginForm({ tab }) {
     const navigate = useNavigate();
     const { login } = useAuth();
     const [loading, setLoading] = useState(false);
+    
+    // Estado reactivo para almacenar los mensajes de error por cada input de MUI
+    const [fieldErrors, setFieldErrors] = useState({});
 
     const [form, setForm] = useState({
         email: "",
@@ -30,13 +34,33 @@ export default function LocalLoginForm({ tab }) {
     });
 
     const handleChange = (e) => {
-        setForm({ ...form, [e.target.name]: e.target.value });
+        const { name, value } = e.target;
+        setForm({ ...form, [name]: value });
+        
+        // Limpieza automática del error en foco al escribir
+        if (fieldErrors[name]) {
+            setFieldErrors(prev => {
+                const copy = { ...prev };
+                delete copy[name];
+                return copy;
+            });
+        }
     };
 
     const handleLogin = async (e) => {
         e.preventDefault();
-        if (!form.email || !form.password) {
-            showErrorToast("Por favor, ingresa correo y contraseña.");
+        setFieldErrors({});
+
+        // Validación con Zod para el Login
+        const validation = loginSchema.safeParse({ email: form.email, password: form.password });
+        
+        if (!validation.success) {
+            const errors = {};
+            validation.error.issues.forEach(issue => {
+                errors[issue.path[0]] = issue.message;
+            });
+            setFieldErrors(errors);
+            showErrorToast("Verifica los datos ingresados.");
             return;
         }
 
@@ -58,8 +82,18 @@ export default function LocalLoginForm({ tab }) {
 
     const handleRegister = async (e) => {
         e.preventDefault();
-        if (!form.first_name || !form.last_name || !form.email || !form.password) {
-            showErrorToast("Por favor, completa todos los campos.");
+        setFieldErrors({});
+
+        // Validación con Zod para el Registro
+        const validation = registerSchema.safeParse(form);
+        
+        if (!validation.success) {
+            const errors = {};
+            validation.error.issues.forEach(issue => {
+                errors[issue.path[0]] = issue.message;
+            });
+            setFieldErrors(errors);
+            showErrorToast("El formulario contiene errores de validación.");
             return;
         }
 
@@ -76,7 +110,6 @@ export default function LocalLoginForm({ tab }) {
             closeAlerts();
             setLoading(false);
             
-            // Interceptamos la respuesta para identificar cuentas existentes de forma inteligente
             const errorText = err.message || "";
             const isDuplicate = 
                 errorText.toLowerCase().includes("exist") || 
@@ -84,13 +117,11 @@ export default function LocalLoginForm({ tab }) {
                 errorText.toLowerCase().includes("conflict");
 
             if (isDuplicate) {
-                // Si el usuario existe, se muestra el cuadro de error formal idéntico a tu logout
                 showError(
                     "Cuenta ya registrada", 
                     "El correo electrónico ingresado ya se encuentra vinculado a otra cuenta en la plataforma."
                 );
             } else {
-                // Cualquier otro error común se notifica mediante un Toast rápido en la esquina
                 showErrorToast(errorText || "No se pudo procesar la solicitud.");
             }
         }
@@ -100,7 +131,7 @@ export default function LocalLoginForm({ tab }) {
         <Box sx={{ mt: 2 }}>
             {/* ── SECCIÓN DE LOGIN ── */}
             {tab === 0 && (
-                <Box component="form" onSubmit={handleLogin}>
+                <Box component="form" onSubmit={handleLogin} noValidate>
                     <TextField
                         fullWidth
                         margin="dense"
@@ -108,7 +139,9 @@ export default function LocalLoginForm({ tab }) {
                         name="email"
                         value={form.email}
                         onChange={handleChange}
-                        sx={{ ...inputSx, mb: 2 }}
+                        error={!!fieldErrors.email}
+                        helperText={fieldErrors.email}
+                        sx={{ ...inputSx, mb: fieldErrors.email ? 0.5 : 2 }}
                         disabled={loading}
                     />
                     <TextField
@@ -119,7 +152,9 @@ export default function LocalLoginForm({ tab }) {
                         name="password"
                         value={form.password}
                         onChange={handleChange}
-                        sx={{ ...inputSx, mb: 2 }}
+                        error={!!fieldErrors.password}
+                        helperText={fieldErrors.password}
+                        sx={{ ...inputSx, mb: fieldErrors.password ? 0.5 : 2 }}
                         disabled={loading}
                     />
                     <Button
@@ -144,7 +179,7 @@ export default function LocalLoginForm({ tab }) {
 
             {/* ── SECCIÓN DE REGISTRO ── */}
             {tab === 1 && (
-                <Box component="form" onSubmit={handleRegister}>
+                <Box component="form" onSubmit={handleRegister} noValidate>
                     <TextField
                         fullWidth
                         margin="dense"
@@ -152,7 +187,9 @@ export default function LocalLoginForm({ tab }) {
                         name="first_name"
                         value={form.first_name}
                         onChange={handleChange}
-                        sx={{ ...inputSx, mb: 1.5 }}
+                        error={!!fieldErrors.first_name}
+                        helperText={fieldErrors.first_name}
+                        sx={{ ...inputSx, mb: fieldErrors.first_name ? 0.5 : 1.5 }}
                         disabled={loading}
                     />
                     <TextField
@@ -162,7 +199,9 @@ export default function LocalLoginForm({ tab }) {
                         name="last_name"
                         value={form.last_name}
                         onChange={handleChange}
-                        sx={{ ...inputSx, mb: 1.5 }}
+                        error={!!fieldErrors.last_name}
+                        helperText={fieldErrors.last_name}
+                        sx={{ ...inputSx, mb: fieldErrors.last_name ? 0.5 : 1.5 }}
                         disabled={loading}
                     />
                     <TextField
@@ -172,7 +211,9 @@ export default function LocalLoginForm({ tab }) {
                         name="email"
                         value={form.email}
                         onChange={handleChange}
-                        sx={{ ...inputSx, mb: 1.5 }}
+                        error={!!fieldErrors.email}
+                        helperText={fieldErrors.email}
+                        sx={{ ...inputSx, mb: fieldErrors.email ? 0.5 : 1.5 }}
                         disabled={loading}
                     />
                     <TextField
@@ -183,7 +224,9 @@ export default function LocalLoginForm({ tab }) {
                         name="password"
                         value={form.password}
                         onChange={handleChange}
-                        sx={{ ...inputSx, mb: 2 }}
+                        error={!!fieldErrors.password}
+                        helperText={fieldErrors.password}
+                        sx={{ ...inputSx, mb: fieldErrors.password ? 0.5 : 2 }}
                         disabled={loading}
                     />
                     <Button

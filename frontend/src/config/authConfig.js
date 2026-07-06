@@ -6,7 +6,7 @@ const tenantId = import.meta.env.VITE_AZURE_TENANT_ID;
 export const msalConfig = {
     auth: {
         clientId,
-        authority: `https://login.microsoftonline.com/${tenantId}`,
+        authority: "https://login.microsoftonline.com/common",
         redirectUri: window.location.origin,
     },
     cache: {
