@@ -26,7 +26,7 @@ const login = async (req, res) => {
 
             const azureUser = {
                 azureOid: decoded.oid,
-                email: decoded.email || decoded.preferred_username,
+                email: (decoded.email || decoded.preferred_username).toLowerCase(),
                 name: decoded.name
             };
 
@@ -41,7 +41,7 @@ const login = async (req, res) => {
                 return res.status(400).json({ message: "El email y la contraseña son requeridos" });
             }
 
-            const dbUser = await usersService.loginWithCredentials(email, password);
+            const dbUser = await usersService.loginWithCredentials(email.toLowerCase(), password);
 
             if (!dbUser) {
                 return res.status(401).json({ message: "Credenciales incorrectas" });
@@ -67,13 +67,13 @@ const register = async (req, res) => {
             return res.status(400).json({ message: "Todos los campos son requeridos" });
         }
 
-        const existing = await usersService.findByEmail(email);
+        const existing = await usersService.findByEmail(email.toLowerCase());
         if (existing) {
             return res.status(409).json({ message: "El email ya está registrado" });
         }
 
         const newUser = await usersService.registerLocalUser({
-            email,
+            email: email.toLowerCase(),
             password,
             first_name,
             last_name

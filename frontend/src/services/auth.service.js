@@ -15,7 +15,7 @@ export const loginWithCredentials = async (email, password) => {
     const res = await fetch(`${API}/api/auth/login`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ type: "local", email, password }),
+        body: JSON.stringify({ type: "local", email: email.toLowerCase(), password }),
     });
 
     if (!res.ok) throw await res.json();
@@ -26,7 +26,7 @@ export const registerUser = async ({ email, password, first_name, last_name }) =
     const res = await fetch(`${API}/api/auth/register`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password, first_name, last_name }),
+        body: JSON.stringify({ email: email.toLowerCase(), password, first_name, last_name }),
     });
 
     if (!res.ok) throw await res.json();
