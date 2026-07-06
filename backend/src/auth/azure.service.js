@@ -23,10 +23,7 @@ const validateAzureToken = async (token) => {
     const keySet = await JWKS();
 
     const { payload } = await jwtVerify(token, keySet, {
-        issuer: [
-            `https://login.microsoftonline.com/${tenantId}/v2.0`,
-            "https://login.microsoftonline.com/common/v2.0"
-        ],
+        issuer: `https://login.microsoftonline.com/${tenantId}/v2.0`,
         audience: clientId
     });
 
