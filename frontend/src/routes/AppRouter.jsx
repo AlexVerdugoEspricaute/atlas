@@ -2,23 +2,34 @@ import { Routes, Route, Navigate } from "react-router-dom";
 import { useMsal } from "@azure/msal-react";
 import { InteractionStatus } from "@azure/msal-browser";
 import { Box, CircularProgress } from "@mui/material";
+
 import PrivateRoute from "./PrivateRoute";
+import PublicRoute from "./PublicRoute";
+
 import LoginPage from "@/pages/LoginPage";
 import Dashboard from "@/pages/Dashboard";
+
 import { useAuth } from "@/store/AuthContext";
+
 
 export default function AppRouter() {
     const { isAuthenticated, isLoading } = useAuth();
     const { inProgress, accounts } = useMsal();
 
     const msalPending = inProgress !== InteractionStatus.None;
-    const authHandlerPending = accounts.length > 0 && !isAuthenticated;
+    const authHandlerPending =
+        accounts.length > 0 && !isAuthenticated;
 
-    // Mostrar spinner global mientras se determina el estado de autenticación.
-    // Esto evita que se rendericen rutas parciales y produce el flash del login.
     if (msalPending || isLoading || authHandlerPending) {
         return (
-            <Box sx={{ display: "flex", alignItems: "center", justifyContent: "center", minHeight: "100vh" }}>
+            <Box
+                sx={{
+                    display:"flex",
+                    justifyContent:"center",
+                    alignItems:"center",
+                    minHeight:"100vh"
+                }}
+            >
                 <CircularProgress />
             </Box>
         );
@@ -26,13 +37,24 @@ export default function AppRouter() {
 
     return (
         <Routes>
-            <Route path="/login" element={<LoginPage />} />
-
+            <Route
+                path="/login"
+                element={
+                    <PublicRoute>
+                        <LoginPage />
+                    </PublicRoute>
+                }
+            />
             <Route element={<PrivateRoute />}>
-                <Route path="/" element={<Dashboard />} />
+                <Route
+                    path="/"
+                    element={<Dashboard />}
+                />
             </Route>
-
-            <Route path="*" element={<Navigate to="/" replace />} />
+            <Route
+                path="*"
+                element={<Navigate to="/" replace />}
+            />
         </Routes>
     );
 }

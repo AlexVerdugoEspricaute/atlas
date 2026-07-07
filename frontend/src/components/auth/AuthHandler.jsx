@@ -60,7 +60,10 @@ const AuthHandler = () => {
                     error
                 );
                 if (error instanceof InteractionRequiredAuthError) {
-                    instance.loginRedirect(loginRequest);
+                    instance.loginRedirect({
+                        ...loginRequest,
+                        prompt: "select_account"
+                    });
                     return;
                 }
                 setAuthError(
