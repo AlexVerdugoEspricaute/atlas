@@ -1,15 +1,29 @@
 import { useState } from "react";
+
 import {
     Box,
     Button,
     CircularProgress,
     TextField
 } from "@mui/material";
-import { inputSx } from "../../styles/inputStyles";
+
+import { inputSx } from "@/styles/inputStyles";
+import PasswordField from "@/components/common/PasswordField";
+
 import { useNavigate } from "react-router-dom";
-import { loginWithCredentials, registerUser } from "@/services/auth.service";
+
+import {
+    loginWithCredentials,
+    registerUser
+} from "@/services/auth.service";
+
 import { useAuth } from "@/store/AuthContext";
-import { loginSchema, registerSchema } from "@/validations/auth.validation";
+
+import {
+    loginSchema,
+    registerSchema
+} from "@/validations/auth.validation";
+
 import {
     showSuccessToast,
     showErrorToast,
@@ -18,11 +32,17 @@ import {
     showError
 } from "@/utils/alerts";
 
+
 export default function LocalLoginForm({ tab }) {
+
     const navigate = useNavigate();
     const { login } = useAuth();
+
     const [loading, setLoading] = useState(false);
+
     const [fieldErrors, setFieldErrors] = useState({});
+
+
     const [form, setForm] = useState({
         email: "",
         password: "",
@@ -32,23 +52,40 @@ export default function LocalLoginForm({ tab }) {
 
 
     const handleChange = (e) => {
-        const { name, value } = e.target;
+
+        const {
+            name,
+            value
+        } = e.target;
+
+
         setForm(prev => ({
             ...prev,
             [name]: value
         }));
-        if (fieldErrors[name]) {
+
+
+        if(fieldErrors[name]){
+
             setFieldErrors(prev => {
-                const copy = { ...prev };
+
+                const copy = {
+                    ...prev
+                };
+
                 delete copy[name];
+
                 return copy;
             });
         }
     };
 
 
+
     const handleLogin = async (e) => {
+
         e.preventDefault();
+
         setFieldErrors({});
 
 
@@ -58,117 +95,198 @@ export default function LocalLoginForm({ tab }) {
         });
 
 
-        if (!validation.success) {
+        if(!validation.success){
+
             const errors = {};
+
             validation.error.issues.forEach(issue => {
-                errors[issue.path[0]] = issue.message;
-            });
-            setFieldErrors(errors);
-            showErrorToast(
-                "Verifica los datos ingresados."
-            );
-            return;
-        }
 
-        try {
-            setLoading(true);
-            showLoadingOverlay(
-                "Iniciando sesión..."
-            );
-
-            const response = await loginWithCredentials(
-                form.email,
-                form.password
-            );
-
-            const { token, user } = response;
-            closeAlerts();
-
-            login(
-                token,
-                user
-            );
-
-            showSuccessToast(
-                `¡Bienvenido/a ${user.first_name || ""}!`
-            );
-            navigate("/");
-
-        } catch (err) {
-            closeAlerts();
-
-            console.error(
-                "LOGIN ERROR:",
-                err
-            );
-            showErrorToast(
-                err?.message ||
-                "Credenciales inválidas."
-            );
-        } finally {
-            setLoading(false);
-        }
-    };
-
-    const handleRegister = async (e) => {
-        e.preventDefault();
-
-        setFieldErrors({});
-
-        const validation = registerSchema.safeParse(form);
-
-        if (!validation.success) {
-            const errors = {};
-            validation.error.issues.forEach(issue => {
                 errors[issue.path[0]] =
                     issue.message;
 
             });
 
+
             setFieldErrors(errors);
 
             showErrorToast(
-                "El formulario contiene errores."
+                "Verifica los datos ingresados."
             );
 
             return;
         }
-        try {
+
+
+
+        try{
+
             setLoading(true);
 
             showLoadingOverlay(
-                "Creando cuenta..."
+                "Iniciando sesión..."
             );
 
-            const response = await registerUser(form);
+
+            const response =
+                await loginWithCredentials(
+                    form.email,
+                    form.password
+                );
+
 
             const {
                 token,
                 user
             } = response;
+
+
             closeAlerts();
+
+
             login(
                 token,
                 user
             );
+
+
+            showSuccessToast(
+                `¡Bienvenido/a ${user.first_name || ""}!`
+            );
+
+
+            navigate("/");
+
+
+        }catch(err){
+
+            closeAlerts();
+
+
+            console.error(
+                "LOGIN ERROR:",
+                err
+            );
+
+
+            showErrorToast(
+                err?.message ||
+                "Credenciales inválidas."
+            );
+
+
+        }finally{
+
+            setLoading(false);
+
+        }
+    };
+
+
+
+
+    const handleRegister = async (e) => {
+
+        e.preventDefault();
+
+
+        setFieldErrors({});
+
+
+        const validation =
+            registerSchema.safeParse(form);
+
+
+
+        if(!validation.success){
+
+            const errors = {};
+
+
+            validation.error.issues.forEach(issue => {
+
+                errors[issue.path[0]] =
+                    issue.message;
+
+            });
+
+
+
+            setFieldErrors(errors);
+
+
+            showErrorToast(
+                "El formulario contiene errores."
+            );
+
+
+            return;
+
+        }
+
+
+
+        try{
+
+
+            setLoading(true);
+
+
+            showLoadingOverlay(
+                "Creando cuenta..."
+            );
+
+
+
+            const response =
+                await registerUser(form);
+
+
+
+            const {
+                token,
+                user
+            } = response;
+
+
+
+            closeAlerts();
+
+
+
+            login(
+                token,
+                user
+            );
+
+
+
             showSuccessToast(
                 `¡Bienvenido/a ${user.first_name}!`
             );
 
+
+
             navigate("/");
 
-        } catch(err) {
+
+
+        }catch(err){
+
 
             closeAlerts();
+
 
             console.error(
                 "REGISTER ERROR:",
                 err
             );
 
+
+
             const errorText =
-                err?.message ||
-                "";
+                err?.message || "";
+
+
 
             const isDuplicate =
                 errorText
@@ -183,189 +301,362 @@ export default function LocalLoginForm({ tab }) {
                 .toLowerCase()
                 .includes("conflict");
 
+
+
             if(isDuplicate){
+
                 showError(
                     "Cuenta ya registrada",
                     "Este correo ya está asociado a una cuenta."
                 );
-            }
-            else{
+
+            }else{
+
                 showErrorToast(
                     errorText ||
                     "No se pudo crear la cuenta."
                 );
             }
-        } finally {
+
+
+
+        }finally{
+
             setLoading(false);
+
         }
+
     };
 
+
+
+
     return (
+
         <Box sx={{mt:2}}>
+
+
             {
             tab === 0 && (
-            <Box
-                component="form"
-                onSubmit={handleLogin}
-                noValidate
-            >
-                <TextField
-                    fullWidth
-                    margin="dense"
-                    label="Email"
-                    name="email"
-                    type="email"
-                    autoComplete="email"
-                    value={form.email}
-                    onChange={handleChange}
-                    error={!!fieldErrors.email}
-                    helperText={fieldErrors.email}
-                    sx={inputSx}
-                    disabled={loading}
-                />
 
-                <TextField
-                    fullWidth
-                    margin="dense"
-                    label="Password"
-                    name="password"
-                    type="password"
-                    autoComplete="current-password"
-                    value={form.password}
-                    onChange={handleChange}
-                    error={!!fieldErrors.password}
-                    helperText={fieldErrors.password}
-                    sx={inputSx}
-                    disabled={loading}
-                />
-
-                <Button
-                    fullWidth
-                    type="submit"
-                    variant="contained"
-                    disabled={loading}
-                    sx={{
-                        mt:2,
-                        py:1.2,
-                        borderRadius:2,
-                        textTransform:"none",
-                        fontWeight:600,
-                        bgcolor:"#6E0D25",
-                        "&:hover":{
-                            bgcolor:"#5A0B1F"
-                        }
-                    }}
+                <Box
+                    component="form"
+                    onSubmit={handleLogin}
+                    noValidate
                 >
-                {
-                    loading
-                    ?
-                    <CircularProgress
-                        size={24}
-                        sx={{color:"#fff"}}
+
+
+                    <TextField
+
+                        fullWidth
+                        margin="dense"
+
+                        label="Email"
+
+                        name="email"
+
+                        type="email"
+
+                        autoComplete="email"
+
+                        value={form.email}
+
+                        onChange={handleChange}
+
+                        error={!!fieldErrors.email}
+
+                        helperText={fieldErrors.email}
+
+                        sx={inputSx}
+
+                        disabled={loading}
+
                     />
-                    :
-                    "Iniciar sesión"
-                }
-                </Button>
-            </Box>
+
+
+
+                    <PasswordField
+
+                        label="Contraseña"
+
+                        name="password"
+
+                        value={form.password}
+
+                        onChange={handleChange}
+
+                        error={!!fieldErrors.password}
+
+                        helperText={fieldErrors.password}
+
+                        autoComplete="current-password"
+
+                        disabled={loading}
+
+                        sx={inputSx}
+
+                    />
+
+
+
+
+                    <Button
+
+                        fullWidth
+
+                        type="submit"
+
+                        variant="contained"
+
+                        disabled={loading}
+
+                        sx={{
+
+                            mt:2,
+
+                            py:1.2,
+
+                            borderRadius:2,
+
+                            textTransform:"none",
+
+                            fontWeight:600,
+
+                            bgcolor:"#6E0D25",
+
+                            "&:hover":{
+                                bgcolor:"#5A0B1F"
+                            }
+
+                        }}
+
+                    >
+
+                    {
+                        loading
+                        ?
+                        <CircularProgress
+                            size={24}
+                            sx={{
+                                color:"#fff"
+                            }}
+                        />
+
+                        :
+
+                        "Iniciar sesión"
+                    }
+
+
+                    </Button>
+
+
+                </Box>
+
             )
             }
 
+
+
+
             {
             tab === 1 && (
-            <Box
-                component="form"
-                onSubmit={handleRegister}
-                noValidate
-            >
-                <TextField
-                    fullWidth
-                    margin="dense"
-                    label="Nombre"
-                    name="first_name"
-                    autoComplete="given-name"
-                    value={form.first_name}
-                    onChange={handleChange}
-                    error={!!fieldErrors.first_name}
-                    helperText={fieldErrors.first_name}
-                    sx={inputSx}
-                    disabled={loading}
-                />
 
-                <TextField
-                    fullWidth
-                    margin="dense"
-                    label="Apellido"
-                    name="last_name"
-                    autoComplete="family-name"
-                    value={form.last_name}
-                    onChange={handleChange}
-                    error={!!fieldErrors.last_name}
-                    helperText={fieldErrors.last_name}
-                    sx={inputSx}
-                    disabled={loading}
-                />
 
-                <TextField
-                    fullWidth
-                    margin="dense"
-                    label="Email"
-                    name="email"
-                    type="email"
-                    autoComplete="email"
-                    value={form.email}
-                    onChange={handleChange}
-                    error={!!fieldErrors.email}
-                    helperText={fieldErrors.email}
-                    sx={inputSx}
-                    disabled={loading}
-                />
+                <Box
 
-                <TextField
-                    fullWidth
-                    margin="dense"
-                    label="Password"
-                    name="password"
-                    type="password"
-                    autoComplete="new-password"
-                    value={form.password}
-                    onChange={handleChange}
-                    error={!!fieldErrors.password}
-                    helperText={fieldErrors.password}
-                    sx={inputSx}
-                    disabled={loading}
-                />
-                <Button
-                    fullWidth
-                    type="submit"
-                    variant="contained"
-                    disabled={loading}
-                    sx={{
-                        mt:2,
-                        py:1.2,
-                        borderRadius:2,
-                        textTransform:"none",
-                        fontWeight:600,
-                        bgcolor:"#6E0D25",
-                        "&:hover":{
-                            bgcolor:"#5A0B1F"
-                        }
-                    }}
+                    component="form"
+
+                    onSubmit={handleRegister}
+
+                    noValidate
+
                 >
-                {
-                    loading
-                    ?
-                    <CircularProgress
-                        size={24}
-                        sx={{color:"#fff"}}
+
+
+
+                    <TextField
+
+                        fullWidth
+
+                        margin="dense"
+
+                        label="Nombre"
+
+                        name="first_name"
+
+                        autoComplete="given-name"
+
+                        value={form.first_name}
+
+                        onChange={handleChange}
+
+                        error={!!fieldErrors.first_name}
+
+                        helperText={fieldErrors.first_name}
+
+                        sx={inputSx}
+
+                        disabled={loading}
+
                     />
-                    :
-                    "Crear cuenta"
-                }
-                </Button>
-            </Box>
+
+
+
+
+                    <TextField
+
+                        fullWidth
+
+                        margin="dense"
+
+                        label="Apellido"
+
+                        name="last_name"
+
+                        autoComplete="family-name"
+
+                        value={form.last_name}
+
+                        onChange={handleChange}
+
+                        error={!!fieldErrors.last_name}
+
+                        helperText={fieldErrors.last_name}
+
+                        sx={inputSx}
+
+                        disabled={loading}
+
+                    />
+
+
+
+
+                    <TextField
+
+                        fullWidth
+
+                        margin="dense"
+
+                        label="Email"
+
+                        name="email"
+
+                        type="email"
+
+                        autoComplete="email"
+
+                        value={form.email}
+
+                        onChange={handleChange}
+
+                        error={!!fieldErrors.email}
+
+                        helperText={fieldErrors.email}
+
+                        sx={inputSx}
+
+                        disabled={loading}
+
+                    />
+
+
+
+
+
+                    <PasswordField
+
+                        label="Contraseña"
+
+                        name="password"
+
+                        value={form.password}
+
+                        onChange={handleChange}
+
+                        error={!!fieldErrors.password}
+
+                        helperText={fieldErrors.password}
+
+                        autoComplete="new-password"
+
+                        disabled={loading}
+
+                        sx={inputSx}
+
+                    />
+
+
+
+
+
+
+                    <Button
+
+                        fullWidth
+
+                        type="submit"
+
+                        variant="contained"
+
+                        disabled={loading}
+
+                        sx={{
+
+                            mt:2,
+
+                            py:1.2,
+
+                            borderRadius:2,
+
+                            textTransform:"none",
+
+                            fontWeight:600,
+
+                            bgcolor:"#6E0D25",
+
+                            "&:hover":{
+                                bgcolor:"#5A0B1F"
+                            }
+
+                        }}
+
+                    >
+
+                    {
+                        loading
+                        ?
+                        <CircularProgress
+
+                            size={24}
+
+                            sx={{
+                                color:"#fff"
+                            }}
+
+                        />
+
+                        :
+
+                        "Crear cuenta"
+                    }
+
+
+                    </Button>
+
+
+
+                </Box>
+
+
             )
-        }
+            }
+
+
+
         </Box>
+
     );
+
 }
