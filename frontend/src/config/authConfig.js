@@ -6,7 +6,7 @@ const tenantId = import.meta.env.VITE_AZURE_TENANT_ID;
 export const msalConfig = {
     auth: {
         clientId,
-        authority: `https://login.microsoftonline.com/${tenantId}`,
+        authority: "https://login.microsoftonline.com/common",
         redirectUri: window.location.origin,
     },
     cache: {
@@ -15,8 +15,8 @@ export const msalConfig = {
     },
     system: {
         loggerOptions: {
-            logLevel: "Error", // en vez de Info
-            piiLoggingEnabled: false
+            logLevel: "Error",
+            piiLoggingEnabled: false,
         },
     },
 };
@@ -25,7 +25,8 @@ export const loginRequest = {
     scopes: [
         "openid",
         "profile",
-        "email"
+        "email",
+        "User.Read"
     ]
 };
 

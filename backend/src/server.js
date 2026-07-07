@@ -4,11 +4,13 @@ const app = require("./app");
 
 const PORT = process.env.PORT || 3000;
 
-// SOLO local development
+
 if (process.env.NODE_ENV !== "production") {
-    app.listen(PORT, () => {
-        console.log(`🚀 Atlas API running on port ${PORT}`);
+    app.listen(PORT,()=>{
+        console.log(`Atlas API running on port ${PORT}`);
     });
+
 }
+
 
 module.exports = app;

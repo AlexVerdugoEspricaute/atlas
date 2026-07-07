@@ -1,7 +1,12 @@
 import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useMsal } from "@azure/msal-react";
-import { InteractionRequiredAuthError, EventType } from "@azure/msal-browser";
+import {
+    InteractionRequiredAuthError,
+    EventType,
+    InteractionStatus
+} from "@azure/msal-browser";
+
 import { loginRequest } from "@/config/authConfig";
 import { loginWithMicrosoft } from "@/services/auth.service";
 import { useAuth } from "@/store/AuthContext";
@@ -11,61 +16,73 @@ const AuthHandler = () => {
     const { login, isAuthenticated, setIsLoading, setAuthError } = useAuth();
     const navigate = useNavigate();
 
-    // ── Listener de eventos MSAL (diagnóstico + flujo de redirect) ─────────────
     useEffect(() => {
-        const id = instance.addEventCallback((event) => {
-            console.log("[MSAL_EVENT]", event.eventType, event.error ?? "");
-
+        const callbackId = instance.addEventCallback((event) => {
             if (event.eventType === EventType.LOGIN_FAILURE) {
-                console.error("[MSAL_EVENT] LOGIN_FAILURE:", event.error?.errorCode, event.error?.message);
-                setAuthError(event.error?.message || "Error al iniciar sesión con Microsoft");
+                setAuthError(
+                    event.error?.message || "Error iniciando sesión con Microsoft"
+                );
                 setIsLoading(false);
             }
         });
-        return () => { if (id) instance.removeEventCallback(id); };
+        return () => {
+            if (callbackId) {
+                instance.removeEventCallback(callbackId);
+            }
+        };
     }, [instance, setAuthError, setIsLoading]);
 
-    // ── Intercambio de token tras redirect ─────────────────────────────────────
+
     useEffect(() => {
-        console.log("[AUTH_HANDLER] accounts:", accounts.length, "| inProgress:", inProgress, "| isAuth:", isAuthenticated);
+        if (
+            !accounts.length ||
+            isAuthenticated ||
+            inProgress !== InteractionStatus.None
+        ) {
+            return;
+        }
 
-        if (!accounts.length || isAuthenticated) return;
-
-        setIsLoading(true);
-
-        const runAuth = async () => {
+        const authenticate = async () => {
             try {
-                console.log("[AUTH_HANDLER] acquireTokenSilent...");
+                setIsLoading(true);
                 const response = await instance.acquireTokenSilent({
                     account: accounts[0],
-                    scopes: loginRequest.scopes,
-                    forceRefresh: true,
+                    scopes: loginRequest.scopes
                 });
 
-                console.log("[AUTH_HANDLER] idToken obtenido, enviando al backend...");
-                const { token, user } = await loginWithMicrosoft(response.idToken);
-                console.log("[AUTH_HANDLER] Backend OK, user:", user?.email);
+                const { token, user } =
+                    await loginWithMicrosoft(response.idToken);
                 login(token, user);
                 navigate("/", { replace: true });
-            } catch (err) {
-                if (err instanceof InteractionRequiredAuthError) {
-                    console.warn("[AUTH_HANDLER] InteractionRequired, redirigiendo a Microsoft...");
+            } catch (error) {
+                console.error(
+                    "[AUTH_HANDLER ERROR]",
+                    error
+                );
+                if (error instanceof InteractionRequiredAuthError) {
                     instance.loginRedirect(loginRequest);
                     return;
                 }
-                const msg = err?.message || err?.detail || "Error al iniciar sesión con Microsoft";
-                console.error("[AUTH_HANDLER] Error:", err);
-                setAuthError(msg);
+                setAuthError(
+                    error.message || "Error autenticando usuario"
+                );
             } finally {
                 setIsLoading(false);
             }
         };
-
-        runAuth();
-    }, [accounts, instance, inProgress, isAuthenticated, login, setIsLoading, setAuthError, navigate]);
+        authenticate();
+    }, [
+        accounts,
+        instance,
+        inProgress,
+        isAuthenticated,
+        login,
+        navigate,
+        setIsLoading,
+        setAuthError
+    ]);
 
     return null;
 };
 
 export default AuthHandler;
-

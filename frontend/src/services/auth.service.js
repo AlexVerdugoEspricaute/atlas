@@ -1,4 +1,4 @@
-const API = "https://atlas-backend-sepia.vercel.app";
+const API = import.meta.env.VITE_API_URL;
 
 export const loginWithMicrosoft = async (id_token) => {
     const res = await fetch(`${API}/api/auth/login`, {
