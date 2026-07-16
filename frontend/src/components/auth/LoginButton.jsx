@@ -22,18 +22,14 @@ export default function LoginButton() {
                 textTransform:"none",
                 fontWeight:500,
                 fontSize:"0.95rem",
-
                 backgroundColor:"background.paper",
                 color:"text.primary",
                 border:"2px solid",
                 borderColor:"primary.main",
-
                 display:"flex",
                 alignItems:"center",
                 gap:1.5,
-
                 fontFamily:"Segoe UI, system-ui, sans-serif",
-
                 "&:hover":{
                     backgroundColor:"action.hover",
                     borderColor:"primary.dark",
