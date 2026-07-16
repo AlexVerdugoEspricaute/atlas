@@ -1,25 +1,27 @@
+import colors from "@/theme/colors";
+
 export const inputSx = {
     "& .MuiOutlinedInput-root": {
         borderRadius: "12px",
-        backgroundColor: "#fff",
+        backgroundColor: colors.background.paper,
         transition: "all 0.2s ease",
 
         "& fieldset": {
-            borderColor: "#E5E7EB",
+            borderColor: colors.border.light,
         },
 
         "&:hover fieldset": {
-            borderColor: "#6E0D25",
+            borderColor: colors.primary.main,
         },
 
         "&.Mui-focused fieldset": {
-            borderColor: "#6E0D25",
+            borderColor: colors.primary.main,
             borderWidth: "2px",
         },
     },
 
     "& .MuiInputLabel-root.Mui-focused": {
-        color: "#6E0D25",
+        color: colors.primary.main,
         fontWeight: 500,
     },
 };

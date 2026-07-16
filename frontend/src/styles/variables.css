@@ -8,3 +8,15 @@ html, body, #root {
     height: 100%;
     width: 100%;
 }
+
+:root {
+    --atlas-text:#1a1a2e;
+    --atlas-text-secondary:#6b7280;
+    --atlas-icon-bg:rgba(110,13,37,.08);
+}
+
+[data-theme="dark"] {
+    --atlas-text:#f5f5f5;
+    --atlas-text-secondary:#a1a1aa;
+    --atlas-icon-bg:rgba(193,18,31,.18);
+}

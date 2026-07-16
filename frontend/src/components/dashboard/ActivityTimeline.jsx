@@ -1,46 +1,414 @@
-import { Avatar, Box, Chip, Typography } from "@mui/material";
-import PersonOutlinedIcon from "@mui/icons-material/PersonOutlined";
-import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
-import SettingsOutlinedIcon from "@mui/icons-material/SettingsOutlined";
+import {
+    Box,
+    Typography,
+    Avatar,
+    Chip,
+    Stack
+} from "@mui/material";
 
-const EVENTS = [
-    { label: "Usuario creado",            desc: "Se registró un nuevo usuario en el sistema.",  time: "Hace 2 min",  icon: <PersonOutlinedIcon />,  color: "#6E0D25" },
-    { label: "Acceso seguro",             desc: "Inicio de sesión exitoso desde Chrome.",        time: "Hace 10 min", icon: <LockOutlinedIcon />,    color: "#0d6e4a" },
-    { label: "Configuración actualizada", desc: "Se modificaron los permisos de un rol.",       time: "Hace 1 hora", icon: <SettingsOutlinedIcon />, color: "#0d4a6e" },
+
+import {
+    useTheme
+} from "@mui/material/styles";
+
+
+import PersonAddOutlinedIcon from "@mui/icons-material/PersonAddOutlined";
+import LoginOutlinedIcon from "@mui/icons-material/LoginOutlined";
+import SecurityOutlinedIcon from "@mui/icons-material/SecurityOutlined";
+
+
+import {
+    AtlasCard,
+    MouseGlow
+} from "@/design-system";
+
+
+
+const ACTIVITIES = [
+
+    {
+        title:"Nuevo usuario registrado",
+        description:"Se creó una nueva cuenta en el sistema.",
+        time:"Hace 2 minutos",
+        icon:<PersonAddOutlinedIcon />,
+        color:"#C1121F"
+    },
+
+
+    {
+        title:"Inicio de sesión exitoso",
+        description:"Acceso realizado desde navegador autorizado.",
+        time:"Hace 15 minutos",
+        icon:<LoginOutlinedIcon />,
+        color:"#16A34A"
+    },
+
+
+    {
+        title:"Evento de seguridad",
+        description:"Se actualizaron permisos de usuario.",
+        time:"Hace 1 hora",
+        icon:<SecurityOutlinedIcon />,
+        color:"#2563EB"
+    }
+
 ];
 
-export default function ActivityTimeline() {
+
+
+
+export default function ActivityTimeline(){
+
+
+    const theme = useTheme();
+
+
+
     return (
-        <Box
-            sx={{
-                bgcolor: "#fff",
-                borderRadius: 3,
-                p: 2.5,
-                boxShadow: "0 1px 8px rgba(0,0,0,0.05)",
-                border: "1px solid rgba(0,0,0,0.05)",
-            }}
-        >
-            <Typography variant="subtitle2" fontWeight={600} color="text.secondary" mb={2}>
-                Actividad reciente
-            </Typography>
-            <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
-                {EVENTS.map(({ label, desc, time, icon, color }) => (
-                    <Box key={label} sx={{ display: "flex", gap: 1.5, alignItems: "flex-start" }}>
-                        <Avatar sx={{ width: 36, height: 36, bgcolor: `${color}18`, color, flexShrink: 0 }}>
-                            {icon}
-                        </Avatar>
-                        <Box sx={{ flexGrow: 1, minWidth: 0 }}>
-                            <Typography variant="body2" fontWeight={600}>{label}</Typography>
-                            <Typography variant="caption" color="text.secondary">{desc}</Typography>
+
+        <MouseGlow>
+
+
+            <AtlasCard
+
+                sx={{
+
+                    height:"100%"
+
+                }}
+
+            >
+
+
+
+                <Typography
+
+                    variant="h6"
+
+                    fontWeight={800}
+
+                    mb={0.5}
+
+                >
+
+                    Actividad reciente
+
+                </Typography>
+
+
+
+
+                <Typography
+
+                    variant="body2"
+
+                    color="text.secondary"
+
+                    mb={3}
+
+                >
+
+                    Últimos movimientos registrados.
+
+                </Typography>
+
+
+
+
+
+                <Stack
+
+                    spacing={3}
+
+                >
+
+
+                {
+                    ACTIVITIES.map((item,index)=>(
+
+
+                        <Box
+
+
+                            key={index}
+
+
+
+                            sx={{
+
+
+                                display:"flex",
+
+
+
+                                gap:2,
+
+
+
+                                position:"relative"
+
+
+
+                            }}
+
+
+
+                        >
+
+
+
+
+                            {
+                                index !== ACTIVITIES.length - 1 && (
+
+                                    <Box
+
+
+                                        sx={{
+
+
+                                            position:"absolute",
+
+
+
+                                            left:20,
+
+
+
+                                            top:45,
+
+
+
+                                            height:"calc(100% + 15px)",
+
+
+
+                                            width:"1px",
+
+
+
+                                            background:
+                                            theme.palette.divider
+
+
+
+                                        }}
+
+
+                                    />
+
+                                )
+                            }
+
+
+
+
+
+
+                            <Avatar
+
+
+                                sx={{
+
+
+
+                                    width:42,
+
+
+
+                                    height:42,
+
+
+
+                                    zIndex:1,
+
+
+
+                                    background:
+
+                                    `${item.color}18`,
+
+
+
+
+                                    color:item.color,
+
+
+
+                                    border:
+
+                                    `1px solid ${item.color}35`
+
+
+
+                                }}
+
+
+
+                            >
+
+                                {item.icon}
+
+
+                            </Avatar>
+
+
+
+
+
+
+
+                            <Box
+
+                                sx={{
+
+                                    flexGrow:1
+
+                                }}
+
+                            >
+
+
+
+
+                                <Typography
+
+
+                                    variant="body2"
+
+
+                                    fontWeight={800}
+
+
+
+                                >
+
+                                    {item.title}
+
+
+                                </Typography>
+
+
+
+
+
+                                <Typography
+
+
+                                    variant="caption"
+
+
+                                    color="text.secondary"
+
+
+                                    display="block"
+
+
+
+                                    sx={{
+
+                                        mt:.3
+
+                                    }}
+
+
+
+                                >
+
+                                    {item.description}
+
+
+                                </Typography>
+
+
+
+
+
+
+                                <Chip
+
+
+                                    label={item.time}
+
+
+
+                                    size="small"
+
+
+
+                                    sx={{
+
+
+
+                                        mt:1.2,
+
+
+
+                                        height:24,
+
+
+
+                                        fontSize:"0.7rem",
+
+
+
+                                        background:
+
+                                        theme.palette.mode==="dark"
+
+                                        ?
+
+                                        "rgba(255,255,255,.08)"
+
+                                        :
+
+                                        "#F8FAFC",
+
+
+
+                                        color:
+
+                                        theme.palette.text.secondary,
+
+
+
+                                        borderRadius:"8px"
+
+
+
+                                    }}
+
+
+
+                                />
+
+
+
+
+                            </Box>
+
+
+
+
+
+
                         </Box>
-                        <Chip
-                            label={time}
-                            size="small"
-                            sx={{ fontSize: "0.7rem", bgcolor: "#F4F6F8", color: "#9ca3af", height: 22, flexShrink: 0 }}
-                        />
-                    </Box>
-                ))}
-            </Box>
-        </Box>
+
+
+                    ))
+                }
+
+
+                </Stack>
+
+
+
+            </AtlasCard>
+
+
+
+        </MouseGlow>
+
     );
+
 }

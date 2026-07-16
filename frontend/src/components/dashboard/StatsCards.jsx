@@ -1,60 +1,128 @@
-import { Box, Typography } from "@mui/material";
-import PeopleOutlinedIcon from "@mui/icons-material/PeopleOutlined";
-import BadgeOutlinedIcon from "@mui/icons-material/BadgeOutlined";
-import TrendingUpIcon from "@mui/icons-material/TrendingUp";
-import CheckCircleOutlinedIcon from "@mui/icons-material/CheckCircleOutlined";
+import { Box, Typography, Stack, Chip } from "@mui/material";
 
-const STATS = [
-    { label: "Usuarios activos",   value: "—", icon: <PeopleOutlinedIcon />,     color: "#6E0D25" },
-    { label: "Roles asignados",    value: "—", icon: <BadgeOutlinedIcon />,       color: "#0d6e4a" },
-    { label: "Actividad mensual",  value: "—", icon: <TrendingUpIcon />,          color: "#0d4a6e" },
-    { label: "Tareas completadas", value: "—", icon: <CheckCircleOutlinedIcon />, color: "#6e4a0d" },
-];
+import { useTheme } from "@mui/material/styles";
+
+import PeopleOutlinedIcon from "@mui/icons-material/PeopleOutlined";
+import AdminPanelSettingsOutlinedIcon from "@mui/icons-material/AdminPanelSettingsOutlined";
+import TrendingUpOutlinedIcon from "@mui/icons-material/TrendingUpOutlined";
+import SecurityOutlinedIcon from "@mui/icons-material/SecurityOutlined";
+
+import { AtlasCard, IconBadge, MouseGlow } from "@/design-system";
 
 export default function StatsCards() {
+    const theme = useTheme();
+
+    const STATS = [
+        {
+            label: "Usuarios totales",
+            value: "—",
+            description: "Usuarios registrados",
+            icon: <PeopleOutlinedIcon />,
+            color: theme.palette.primary.main,
+            trend: "+12%",
+        },
+
+        {
+            label: "Roles activos",
+            value: "—",
+            description: "Permisos configurados",
+            icon: <AdminPanelSettingsOutlinedIcon />,
+            color: "#16A34A",
+            trend: "Activo",
+        },
+
+        {
+            label: "Actividad",
+            value: "—",
+            description: "Acciones este mes",
+            icon: <TrendingUpOutlinedIcon />,
+            color: "#2563EB",
+            trend: "+8%",
+        },
+
+        {
+            label: "Seguridad",
+            value: "99%",
+            description: "Estado protegido",
+            icon: <SecurityOutlinedIcon />,
+            color: "#F59E0B",
+            trend: "Óptimo",
+        },
+    ];
+
     return (
         <Box
             sx={{
                 display: "grid",
-                gridTemplateColumns: { xs: "1fr 1fr", lg: "repeat(4, 1fr)" },
-                gap: 2,
-                mb: 3,
+                gridTemplateColumns: {
+                    xs: "1fr",
+                    sm: "repeat(2,1fr)",
+                    lg: "repeat(4,1fr)",
+                },
+                gap: 3,
             }}
         >
-            {STATS.map(({ label, value, icon, color }) => (
-                <Box
-                    key={label}
-                    sx={{
-                        bgcolor: "#fff",
-                        borderRadius: 3,
-                        p: 2.5,
-                        display: "flex",
-                        alignItems: "center",
-                        gap: 2,
-                        boxShadow: "0 1px 8px rgba(0,0,0,0.05)",
-                        border: "1px solid rgba(0,0,0,0.05)",
-                    }}
-                >
-                    <Box
+            {STATS.map((item) => (
+                <MouseGlow key={item.label}>
+                    <AtlasCard
                         sx={{
-                            width: 44,
-                            height: 44,
-                            borderRadius: 2,
-                            bgcolor: `${color}18`,
-                            display: "flex",
-                            alignItems: "center",
-                            justifyContent: "center",
-                            color,
-                            flexShrink: 0,
+                            height: "100%",
+                            cursor: "pointer",
+                            overflow: "hidden",
+                            "&:hover .stat-value": {
+                                transform: "translateY(-2px)",
+                            },
                         }}
                     >
-                        {icon}
-                    </Box>
-                    <Box>
-                        <Typography variant="h6" fontWeight={700} sx={{ lineHeight: 1 }}>{value}</Typography>
-                        <Typography variant="caption" color="text.secondary">{label}</Typography>
-                    </Box>
-                </Box>
+                        <Stack spacing={2.5}>
+                            <Box
+                                sx={{
+                                    display: "flex",
+                                    justifyContent: "space-between",
+                                    alignItems: "center",
+                                }}
+                            >
+                                <IconBadge color={item.color}>{item.icon}</IconBadge>
+
+                                <Chip
+                                    label={item.trend}
+                                    size="small"
+                                    sx={{
+                                        fontWeight: 800,
+                                        background: `${item.color}15`,
+                                        color: item.color,
+                                        borderRadius: "12px",
+                                    }}
+                                />
+                            </Box>
+
+                            <Box>
+                                <Typography
+                                    className="stat-value"
+                                    variant="h3"
+                                    fontWeight={900}
+                                    sx={{
+                                        letterSpacing: "-0.05em",
+                                        transition: ".25s ease",
+                                    }}
+                                >
+                                    {item.value}
+                                </Typography>
+                                <Typography
+                                    fontWeight={800}
+                                    sx={{
+                                        mt: 0.5,
+                                    }}
+                                >
+                                    {item.label}
+                                </Typography>
+                                <Typography variant="body2" color="text.secondary">
+                                    {item.description}
+                                </Typography>
+                            </Box>
+                        </Stack>
+                    </AtlasCard>
+                </MouseGlow>
             ))}
         </Box>
     );
