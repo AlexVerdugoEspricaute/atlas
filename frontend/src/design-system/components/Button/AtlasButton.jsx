@@ -24,6 +24,7 @@ export default function AtlasButton({
                 color: "action.disabled",
             },
         },
+        
         outline: {
             border: "1px solid",
             borderColor: "primary.main",
@@ -33,6 +34,7 @@ export default function AtlasButton({
                 borderColor: "primary.dark",
             },
         },
+
             microsoft: {
             bgcolor: "background.paper",
             color: "text.primary",
@@ -44,6 +46,7 @@ export default function AtlasButton({
                 boxShadow: `0 0 20px ${theme.palette.primary.main}25`,
             },
         },
+
         text: {
             color: "primary.main",
             "&:hover": {

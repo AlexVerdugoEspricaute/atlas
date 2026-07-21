@@ -1,195 +1,290 @@
 const usersRepository = require("../repositories/users.repository");
-const supabase = require("../../../config/supabase");
+
+const {
+    userDTO,
+    usersDTO
+} = require("../dtos/user-response.dto");
+
 const bcrypt = require("bcryptjs");
 
-const getUsers = async () => {
-    return await usersRepository.findAll();
+
+// ─────────────────────────────────────
+// CRUD USERS
+// ─────────────────────────────────────
+const getUsers = async()=>{
+    const users =
+        await usersRepository.findAll();
+    return usersDTO(users);
 };
 
-const getUserById = async (id) => {
-    return await usersRepository.findById(id);
+
+const getUserById = async(id)=>{
+    const user =
+        await usersRepository.findById(id);
+    return userDTO(user);
 };
 
-const createUser = async (data) => {
-    return await usersRepository.create(data);
-};
 
-const updateUser = async (id, data) => {
-    return await usersRepository.update(id, data);
-};
+const createUser = async(data)=>{
 
-const deleteUser = async (id) => {
-    return await usersRepository.remove(id);
-};
-
-const splitName = (fullName = "") => {
-    const parts = fullName.trim().split(/\s+/);
-
-    if (parts.length === 0) {
-        return {
-            first_name: "",
-            last_name: ""
-        };
+    const existingUser =
+        await usersRepository.findByEmail(
+            data.email.toLowerCase().trim()
+        );
+    if(existingUser){
+        throw new Error("El correo ya está registrado");
     }
 
-    if (parts.length === 1) {
-        return {
-            first_name: parts[0],
-            last_name: "-"
-        };
+    const newUser = {
+        email:
+            data.email.toLowerCase().trim(),
+        first_name:
+            data.first_name.trim(),
+        last_name:
+            data.last_name.trim(),
+        provider:
+            "local",
+        is_active:
+            true,
+        role_id:
+            await getDefaultRoleId()
+    };
+    if(data.password){
+        newUser.password_hash =
+            await bcrypt.hash(
+                data.password,
+                10
+            );
     }
 
+    const user =
+        await usersRepository.create(
+            newUser
+        );
+    return userDTO(user);
+};
+
+
+const updateUser = async(id,data)=>{
+
+    const allowedData = {};
+    if(typeof data.first_name==="string"){
+        allowedData.first_name =
+            data.first_name.trim();
+    }
+    if(typeof data.last_name==="string"){
+        allowedData.last_name =
+            data.last_name.trim();
+    }
+    if(typeof data.email==="string"){
+        const email =
+            data.email.toLowerCase().trim();
+        const existingUser =
+            await usersRepository.findByEmail(
+                email
+            );
+        if(
+            existingUser &&
+            existingUser.id!==id
+        ){
+            throw new Error("El correo ya está registrado");
+        }
+        allowedData.email =
+            email;
+    }
+    if(Object.keys(allowedData).length===0){
+        throw new Error("No hay campos válidos para actualizar");
+    }
+    const user =
+        await usersRepository.update(
+            id,
+            allowedData
+        );
+    return userDTO(user);
+};
+
+
+const deleteUser = async(id,loggedUserId)=>{
+    if(id===loggedUserId){
+        throw new Error("No puedes desactivar tu propia cuenta");
+    }
+    return await usersRepository.deactivate(id);
+};
+
+
+// ─────────────────────────────────────
+// HELPERS
+// ─────────────────────────────────────
+const splitName = (fullName="")=>{
+    const parts =
+        fullName.trim().split(/\s+/);
+    if(parts.length===0){
+        return {
+            first_name:"",
+            last_name:""
+        };
+    }
+    if(parts.length===1){
+        return {
+            first_name:parts[0],
+            last_name:"-"
+        };
+    }
     return {
-        first_name: parts.slice(0, -1).join(" "),
-        last_name: parts.slice(-1).join(" ")
+        first_name:
+            parts.slice(0,-1).join(" "),
+        last_name:
+            parts.slice(-1).join(" ")
     };
 };
 
-const findOrCreateUser = async (azureUser) => {
 
-    // Buscar usuario existente por Entra ID
-    const { data: existingUser, error: findError } = await supabase
-        .from("users")
-        .select(`
-            *,
-            roles (*),
-            areas (*)
-        `)
-        .eq("entra_id", azureUser.azureOid)
-        .maybeSingle();
-
-    if (findError) {
-        throw findError;
+// ─────────────────────────────────────
+// MICROSOFT AUTH
+// ─────────────────────────────────────
+const findOrCreateMicrosoftUser = async({azureOid,email,name})=>{
+    let user =
+        await usersRepository.findByEntraId(
+            azureOid
+        );
+    if(user){
+        return userDTO(user);
+    }
+    user =
+        await usersRepository.findByEmail(
+            email
+        );
+    if(user){
+        const updated =
+            await usersRepository.update(
+                user.id,
+                {
+                    entra_id:azureOid,
+                    provider:"microsoft"
+                }
+            );
+        return userDTO(updated);
     }
 
-    if (existingUser) {
-        return existingUser;
-    }
+    const {
+        first_name,
+        last_name
+    } =
+    splitName(name);
 
-    // Obtener rol "user"
-    const { data: defaultRole, error: roleError } = await supabase
-        .from("roles")
-        .select("id")
-        .eq("name", "user")
-        .single();
+    const roleId =
+        await getDefaultRoleId();
 
-    if (roleError) {
-        throw roleError;
-    }
-
-    const { first_name, last_name } = splitName(azureUser.name);
-
-    // Crear usuario
-    const { data: newUser, error: insertError } = await supabase
-        .from("users")
-        .insert({
-            entra_id: azureUser.azureOid,
-            email: azureUser.email,
+    const newUser =
+        await usersRepository.create({
+            entra_id:azureOid,
+            email,
             first_name,
             last_name,
-            role_id: defaultRole.id
-        })
-        .select(`
-            *,
-            roles (*),
-            areas (*)
-        `)
-        .single();
-
-    if (insertError) {
-        throw insertError;
-    }
-
-    return newUser;
+            role_id:roleId,
+            provider:"microsoft",
+            is_active:true
+        });
+    return userDTO(newUser);
 };
 
-module.exports = {
+
+// ─────────────────────────────────────
+// LOCAL LOGIN
+// ─────────────────────────────────────
+const loginWithCredentials = async(email,password)=>{
+    const user =
+        await usersRepository.findAuthUserByEmail(
+            email
+        );
+    if(
+        !user ||
+        !user.password_hash
+    ){
+        return null;
+    }
+
+    const valid =
+        await bcrypt.compare(
+            password,
+            user.password_hash
+        );
+    if(!valid){
+        return null;
+    }
+    return userDTO(user);
+};
+
+
+// ─────────────────────────────────────
+// REGISTER LOCAL
+// ─────────────────────────────────────
+const registerLocalUser = async({
+    email,
+    password,
+    first_name,
+    last_name
+})=>{
+    email =
+        email.toLowerCase().trim();
+
+    const existingUser =
+        await usersRepository.findByEmail(
+            email
+        );
+
+    if(existingUser){
+        throw new Error("El correo ya está registrado");
+    }
+
+    const password_hash =
+        await bcrypt.hash(
+            password,
+            10
+        );
+
+    const roleId =
+        await getDefaultRoleId();
+
+    const user =
+        await usersRepository.create({
+            email,
+            password_hash,
+            first_name:first_name.trim(),
+            last_name:last_name.trim(),
+            role_id:roleId,
+            provider:"local",
+            is_active:true
+        });
+
+    return userDTO(user);
+};
+
+
+// ─────────────────────────────────────
+// PRIVATE
+// ─────────────────────────────────────
+async function getDefaultRoleId(){
+    return await usersRepository.getDefaultRoleId();
+};
+
+
+// ─────────────────────────────────────
+// LOOKUP
+// ─────────────────────────────────────
+const findByEmail = async(email)=>{
+    return await usersRepository.findByEmail(email);
+};
+
+
+module.exports={
     getUsers,
     getUserById,
     createUser,
     updateUser,
     deleteUser,
-    findOrCreateUser,
-    findByEmail,
     findOrCreateMicrosoftUser,
     loginWithCredentials,
     registerLocalUser,
+    findByEmail
 };
-
-// ─── Helpers privados ────────────────────────────────────────────────────────
-
-async function getDefaultRoleId() {
-    const { data, error } = await supabase
-        .from("roles")
-        .select("id")
-        .eq("name", "user")
-        .single();
-    if (error) throw error;
-    return data.id;
-}
-
-// ─── Auth: Microsoft ─────────────────────────────────────────────────────────
-
-async function findOrCreateMicrosoftUser({ azureOid, email, name }) {
-    // 1. Buscar por entra_id (usuario ya registrado con Microsoft)
-    let user = await usersRepository.findByEntraId(azureOid);
-    if (user) return user;
-
-    // 2. Buscar por email (evitar duplicados si ya existe cuenta local)
-    user = await usersRepository.findByEmail(email);
-    if (user) {
-        // Enlazar entra_id a la cuenta existente
-        return await usersRepository.update(user.id, {
-            entra_id: azureOid,
-            provider: "microsoft",
-        });
-    }
-
-    // 3. Crear nuevo usuario Microsoft
-    const { first_name, last_name } = splitName(name);
-    const roleId = await getDefaultRoleId();
-
-    return await usersRepository.create({
-        entra_id: azureOid,
-        email,
-        first_name,
-        last_name,
-        role_id: roleId,
-        provider: "microsoft",
-        is_active: true,
-    });
-}
-
-// ─── Auth: Local ─────────────────────────────────────────────────────────────
-
-async function loginWithCredentials(email, password) {
-    const user = await usersRepository.findByEmail(email);
-
-    if (!user || !user.password_hash) return null;
-
-    const valid = await bcrypt.compare(password, user.password_hash);
-    if (!valid) return null;
-
-    return user;
-}
-
-async function registerLocalUser({ email, password, first_name, last_name }) {
-    const password_hash = await bcrypt.hash(password, 10);
-    const roleId = await getDefaultRoleId();
-
-    return await usersRepository.create({
-        email,
-        password_hash,
-        first_name,
-        last_name,
-        role_id: roleId,
-        provider: "local",
-        is_active: true,
-    });
-}
-
-// ─── Lookup ──────────────────────────────────────────────────────────────────
-
-async function findByEmail(email) {
-    return await usersRepository.findByEmail(email);
-}
