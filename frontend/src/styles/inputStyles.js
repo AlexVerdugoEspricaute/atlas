@@ -3,25 +3,30 @@ import colors from "@/theme/colors";
 export const inputSx = {
     "& .MuiOutlinedInput-root": {
         borderRadius: "12px",
-        backgroundColor: colors.background.paper,
-        transition: "all 0.2s ease",
-
+        bgcolor: "background.paper",
+        color: "text.primary",
+        transition: "all .25s ease",
+        "& input": {
+            color: "text.primary",
+        },
         "& fieldset": {
-            borderColor: colors.border.light,
+            borderColor: "divider",
         },
-
         "&:hover fieldset": {
-            borderColor: colors.primary.main,
+            borderColor: "primary.main",
         },
-
         "&.Mui-focused fieldset": {
-            borderColor: colors.primary.main,
-            borderWidth: "2px",
+            borderColor: "primary.main",
+            borderWidth: 2,
         },
     },
-
+    "& .MuiInputLabel-root": {
+        color: "text.secondary",
+    },
     "& .MuiInputLabel-root.Mui-focused": {
-        color: colors.primary.main,
-        fontWeight: 500,
+        color: "primary.main",
+    },
+    "& .MuiFormHelperText-root": {
+        color: "text.secondary",
     },
 };

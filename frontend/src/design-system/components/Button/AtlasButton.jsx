@@ -1,107 +1,73 @@
 import { Button } from "@mui/material";
-import { colors } from "@/theme";
-
+import { useTheme } from "@mui/material/styles";
 
 export default function AtlasButton({
-
     children,
-
-    variant="primary",
-
-    sx={},
-
+    variant = "primary",
+    sx = {},
     ...props
-
 }) {
 
+    const theme = useTheme();
 
-    const styles = {
+    const variants = {
 
-
-        primary:{
-
-
-            background:
-            colors.gradients.primary,
-
-
-            color:"#fff",
-
-
-            "&:hover":{
-
-                boxShadow:
-                `0 0 20px ${colors.primary.glow}`
-
-            }
-
+        primary: {
+            bgcolor: "primary.main",
+            color: "#fff",
+            "&:hover": {
+                bgcolor: "primary.dark",
+                boxShadow: `0 0 20px ${theme.palette.primary.main}40`,
+            },
+            "&:disabled": {
+                bgcolor: "action.disabledBackground",
+                color: "action.disabled",
+            },
         },
-
-
-        outline:{
-
-
-            border:
-            `1px solid ${colors.primary.main}`,
-
-
-            color:
-            colors.primary.main,
-
-
-            "&:hover":{
-
-                background:
-                "rgba(193,18,31,.08)"
-
-            }
-
-        }
-
-
+        outline: {
+            border: "1px solid",
+            borderColor: "primary.main",
+            color: "primary.main",
+            "&:hover": {
+                bgcolor: "action.hover",
+                borderColor: "primary.dark",
+            },
+        },
+            microsoft: {
+            bgcolor: "background.paper",
+            color: "text.primary",
+            border: "2px solid",
+            borderColor: "primary.main",
+            "&:hover": {
+                bgcolor: "action.hover",
+                borderColor: "primary.dark",
+                boxShadow: `0 0 20px ${theme.palette.primary.main}25`,
+            },
+        },
+        text: {
+            color: "primary.main",
+            "&:hover": {
+                bgcolor: "action.hover",
+            },
+        },
     };
 
-
-
     return (
-
         <Button
-
             {...props}
-
             sx={{
-
-                borderRadius:
-                "12px",
-
-
-                fontWeight:600,
-
-
-                px:3,
-
-
-                py:1.2,
-
-
-                transition:
-                ".3s ease",
-
-
-                ...styles[variant],
-
-
-                ...sx
-
+                py: 1.2,
+                px: 3,
+                borderRadius: 3,
+                textTransform: "none",
+                fontWeight: 700,
+                fontSize: ".95rem",
+                transition: "all .25s ease",
+                ...variants[variant],
+                ...sx,
             }}
-
         >
-
             {children}
-
-
         </Button>
-
     );
-
 }

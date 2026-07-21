@@ -1,17 +1,29 @@
 import { useState } from "react";
 
-import { Box, Button, CircularProgress, TextField } from "@mui/material";
-
-import { inputSx } from "@/styles/inputStyles";
-import PasswordField from "@/components/common/PasswordField";
+import {
+    Box,
+    CircularProgress,
+    TextField,
+} from "@mui/material";
 
 import { useNavigate } from "react-router-dom";
 
-import { loginWithCredentials, registerUser } from "@/services/auth.service";
+import { AtlasButton } from "@/design-system";
+import PasswordField from "@/components/common/PasswordField";
+
+import { inputSx } from "@/styles/inputStyles";
+
+import {
+    loginWithCredentials,
+    registerUser,
+} from "@/services/auth.service";
 
 import { useAuth } from "@/store/AuthContext";
 
-import { loginSchema, registerSchema } from "@/validations/auth.validation";
+import {
+    loginSchema,
+    registerSchema,
+} from "@/validations/auth.validation";
 
 import {
     showSuccessToast,
@@ -26,7 +38,6 @@ export default function LocalLoginForm({ tab }) {
     const { login } = useAuth();
 
     const [loading, setLoading] = useState(false);
-
     const [fieldErrors, setFieldErrors] = useState({});
 
     const [form, setForm] = useState({
@@ -46,12 +57,8 @@ export default function LocalLoginForm({ tab }) {
 
         if (fieldErrors[name]) {
             setFieldErrors((prev) => {
-                const copy = {
-                    ...prev,
-                };
-
+                const copy = { ...prev };
                 delete copy[name];
-
                 return copy;
             });
         }
@@ -86,7 +93,10 @@ export default function LocalLoginForm({ tab }) {
 
             showLoadingOverlay("Iniciando sesión...");
 
-            const response = await loginWithCredentials(form.email, form.password);
+            const response = await loginWithCredentials(
+                form.email,
+                form.password
+            );
 
             const { token, user } = response;
 
@@ -94,7 +104,9 @@ export default function LocalLoginForm({ tab }) {
 
             login(token, user);
 
-            showSuccessToast(`¡Bienvenido/a ${user.first_name || ""}!`);
+            showSuccessToast(
+                `¡Bienvenido/a ${user.first_name || ""}!`
+            );
 
             navigate("/");
         } catch (err) {
@@ -102,7 +114,9 @@ export default function LocalLoginForm({ tab }) {
 
             console.error("LOGIN ERROR:", err);
 
-            showErrorToast(err?.message || "Credenciales inválidas.");
+            showErrorToast(
+                err?.message || "Credenciales inválidas."
+            );
         } finally {
             setLoading(false);
         }
@@ -110,12 +124,14 @@ export default function LocalLoginForm({ tab }) {
 
     const handleRegister = async (e) => {
         e.preventDefault();
+
         setFieldErrors({});
 
         const validation = registerSchema.safeParse(form);
 
         if (!validation.success) {
             const errors = {};
+
             validation.error.issues.forEach((issue) => {
                 errors[issue.path[0]] = issue.message;
             });
@@ -123,6 +139,7 @@ export default function LocalLoginForm({ tab }) {
             setFieldErrors(errors);
 
             showErrorToast("El formulario contiene errores.");
+
             return;
         }
 
@@ -139,7 +156,9 @@ export default function LocalLoginForm({ tab }) {
 
             login(token, user);
 
-            showSuccessToast(`¡Bienvenido/a ${user.first_name}!`);
+            showSuccessToast(
+                `¡Bienvenido/a ${user.first_name}!`
+            );
 
             navigate("/");
         } catch (err) {
@@ -155,9 +174,14 @@ export default function LocalLoginForm({ tab }) {
                 errorText.toLowerCase().includes("conflict");
 
             if (isDuplicate) {
-                showError("Cuenta ya registrada", "Este correo ya está asociado a una cuenta.");
+                showError(
+                    "Cuenta ya registrada",
+                    "Este correo ya está asociado a una cuenta."
+                );
             } else {
-                showErrorToast(errorText || "No se pudo crear la cuenta.");
+                showErrorToast(
+                    errorText || "No se pudo crear la cuenta."
+                );
             }
         } finally {
             setLoading(false);
@@ -167,7 +191,11 @@ export default function LocalLoginForm({ tab }) {
     return (
         <Box sx={{ mt: 2 }}>
             {tab === 0 && (
-                <Box component="form" onSubmit={handleLogin} noValidate>
+                <Box
+                    component="form"
+                    onSubmit={handleLogin}
+                    noValidate
+                >
                     <TextField
                         fullWidth
                         margin="dense"
@@ -195,38 +223,32 @@ export default function LocalLoginForm({ tab }) {
                         sx={inputSx}
                     />
 
-                    <Button
+                    <AtlasButton
                         fullWidth
                         type="submit"
-                        variant="contained"
                         disabled={loading}
-                        sx={{
-                            mt: 2,
-                            py: 1.2,
-                            borderRadius: 2,
-                            textTransform: "none",
-                            fontWeight: 600,
-                            bgcolor: "#6E0D25",
-                            "&:hover": {
-                                bgcolor: "#5A0B1F",
-                            },
-                        }}
+                        sx={{ mt: 2 }}
                     >
                         {loading ? (
                             <CircularProgress
                                 size={24}
                                 sx={{
-                                    color:"common.white", 
+                                    color: "common.white",
                                 }}
                             />
                         ) : (
                             "Iniciar sesión"
                         )}
-                    </Button>
+                    </AtlasButton>
                 </Box>
             )}
+
             {tab === 1 && (
-                <Box component="form" onSubmit={handleRegister} noValidate>
+                <Box
+                    component="form"
+                    onSubmit={handleRegister}
+                    noValidate
+                >
                     <TextField
                         fullWidth
                         margin="dense"
@@ -282,34 +304,23 @@ export default function LocalLoginForm({ tab }) {
                         sx={inputSx}
                     />
 
-                    <Button
+                    <AtlasButton
                         fullWidth
                         type="submit"
-                        variant="contained"
                         disabled={loading}
-                        sx={{
-                            mt: 2,
-                            py: 1.2,
-                            borderRadius: 2,
-                            textTransform: "none",
-                            fontWeight: 600,
-                            bgcolor: "#6E0D25",
-                            "&:hover": {
-                                bgcolor: "#5A0B1F",
-                            },
-                        }}
+                        sx={{ mt: 2 }}
                     >
                         {loading ? (
                             <CircularProgress
                                 size={24}
                                 sx={{
-                                    color:"common.white",
+                                    color: "common.white",
                                 }}
                             />
                         ) : (
                             "Crear cuenta"
                         )}
-                    </Button>
+                    </AtlasButton>
                 </Box>
             )}
         </Box>

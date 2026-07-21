@@ -1,16 +1,11 @@
-import {
-    Box
-} from "@mui/material";
+import { Box } from "@mui/material";
+import { useTheme } from "@mui/material/styles";
 
-import {
-    colors
-} from "@/theme";
+export default function SplitBackground({children}) {
+    const theme=useTheme();
+    const dark=theme.palette.mode==="dark";
 
-
-export default function SplitBackground({
-    children
-}) {
-    return (
+    return(
         <Box
             sx={{
                 minHeight:"100vh",
@@ -20,19 +15,12 @@ export default function SplitBackground({
                 justifyContent:"center",
                 alignItems:"center",
                 overflow:"hidden",
-                background:
-                    `linear-gradient(
-                        135deg,
-                        ${colors.primary.dark},
-                        ${colors.primary.main}
-                    )`,
-                transition:
-                    "background .35s ease"
+                background:dark
+                ?`linear-gradient(135deg,#080B12,#111827,#780000)`
+                :`linear-gradient(135deg,#780000,#C1121F)`,
+                transition:"all .35s ease",
             }}
         >
-
-            {/* CURVA PREMIUM */}
-
             <Box
                 component="svg"
                 viewBox="0 0 100 100"
@@ -42,7 +30,8 @@ export default function SplitBackground({
                     inset:0,
                     width:"100%",
                     height:"100%",
-                }}>
+                }}
+            >
                 <path
                     d="
                     M0,0
@@ -51,11 +40,9 @@ export default function SplitBackground({
                     L0,100
                     Z
                     "
-                    fill="#F8FAFC"
+                    fill={theme.palette.background.default}
                 />
             </Box>
-
-            {/* EFECTO GLOW */}
 
             <Box
                 sx={{
@@ -65,15 +52,13 @@ export default function SplitBackground({
                     borderRadius:"50%",
                     right:-120,
                     top:-100,
-                    background:
-                    `radial-gradient(
-                        circle,
-                        ${colors.primary.light}55,
-                        transparent 70%
-                    )`,
-                    filter:"blur(20px)",
+                    background:dark
+                    ?"radial-gradient(circle, rgba(193,18,31,.28), transparent 70%)"
+                    :"radial-gradient(circle, rgba(230,57,70,.35), transparent 70%)",
+                    filter:"blur(30px)",
                 }}
             />
+
             <Box
                 sx={{
                     position:"relative",
@@ -81,12 +66,11 @@ export default function SplitBackground({
                     width:"100%",
                     display:"flex",
                     justifyContent:"center",
-                    alignItems:"center"}}>
+                    alignItems:"center",
+                }}
+            >
                 {children}
             </Box>
-
         </Box>
-
     );
-
 }
