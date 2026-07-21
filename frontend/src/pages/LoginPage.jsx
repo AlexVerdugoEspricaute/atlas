@@ -44,17 +44,6 @@ export default function LoginPage() {
         <SplitBackground>
             <Box
                 sx={{
-                    position:"absolute",
-                    top:20,
-                    right:20,
-                    zIndex:10,
-                }}
-            >
-                <ThemeToggleButton />
-            </Box>
-
-            <Box
-                sx={{
                     perspective:"1200px",
                     width:"100%",
                     maxWidth:420,
@@ -88,6 +77,19 @@ export default function LoginPage() {
                     }}
                 >
                     <Box sx={FACE_SX}>
+                        <Box
+                            sx={{
+                                position:"absolute",
+                                top:30,
+                                right:30,
+                                zIndex:10,
+                                width: "100%",
+                                display: "flex",
+                                justifyContent: "flex-end",
+                            }}
+                        >
+                            <ThemeToggleButton />
+                        </Box>
                         <LoginHeader />
                         <Box sx={{width:"100%"}}>
                             <LoginButton />
@@ -150,6 +152,19 @@ export default function LoginPage() {
                             transform:"rotateY(180deg)",
                         }}
                     >
+                        <Box
+                            sx={{
+                                position:"absolute",
+                                top:30,
+                                right:30,
+                                zIndex:10,
+                                width: "100%",
+                                display: "flex",
+                                justifyContent: "flex-end",
+                            }}
+                        >
+                            <ThemeToggleButton />
+                        </Box>
                         <Box
                             sx={{
                                 width:"100%",
