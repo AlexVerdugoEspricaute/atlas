@@ -11,7 +11,7 @@ import MenuIcon from "@mui/icons-material/Menu";
 import MenuOpenIcon from "@mui/icons-material/MenuOpen";
 import NotificationsOutlinedIcon from "@mui/icons-material/NotificationsOutlined";
 
-import UserAvatar from "@/components/auth/UserAvatar";
+import UserMenu from "@/components/auth/UserMenu";
 
 import {
     ThemeToggleButton,
@@ -158,7 +158,7 @@ export default function AppHeader({
                     </IconButton>
                 </Tooltip>
                 {/* User */}
-                <UserAvatar />
+                <UserMenu />
             </Toolbar>
         </AppBar>
     );

@@ -31,7 +31,7 @@ export default function SidebarHeader() {
             </Box>
 
             <Box>
-                <Typography fontWeight={800} fontSize={16}>
+                <Typography fontWeight={800} fontSize={16} >
                     ATLAS
                 </Typography>
 

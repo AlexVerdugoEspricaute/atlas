@@ -4,8 +4,6 @@ import {
 } from "@mui/material";
 
 import MainLayout from "@/layouts/MainLayout";
-
-import WelcomeCard from "@/components/dashboard/WelcomeCard";
 import StatsCards from "@/components/dashboard/StatsCards";
 import QuickActions from "@/components/dashboard/QuickActions";
 import ActivityTimeline from "@/components/dashboard/ActivityTimeline";
@@ -38,17 +36,6 @@ export default function Dashboard(){
                     }
                 }}
             >
-
-                {/* HERO */}
-
-                <Box
-                    sx={{
-                        position:"relative",
-                        zIndex:1
-                    }}
-                >
-                    <WelcomeCard />
-                </Box>
 
                 {/* METRICAS */}
 
