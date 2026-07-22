@@ -128,31 +128,50 @@ const register = async (req, res) => {
             });
         }
 
-        const existing =
-            await usersService.findByEmail(
-                email.toLowerCase()
-            );
-
-        if (existing) {
+    const existing =
+        await usersService.findByEmail(
+            email.toLowerCase()
+        )
+    if(existing){
+        if(existing.is_active){
             return res.status(409).json({
-                message: "El email ya está registrado"
+                message:"El email ya está registrado"
             });
         }
 
-        const newUser =
-            await usersService.registerLocalUser({
-                email: email.toLowerCase(),
-                password,
-                first_name,
-                last_name
-            });
+        const user =
+            await usersService.reactivateLocalUser(
+                existing.id,
+                {
+                    email:email.toLowerCase(),
+                    password,
+                    first_name,
+                    last_name
+                }
+            );
 
         const token =
-            jwtService.generateToken(newUser);
-        return res.status(201).json({
+            jwtService.generateToken(user);
+        return res.json({
             token,
-            user: newUser
+            user
         });
+    }
+
+    const newUser =
+        await usersService.registerLocalUser({
+            email:email.toLowerCase(),
+            password,
+            first_name,
+            last_name
+        });
+
+    const token =
+        jwtService.generateToken(newUser);
+    return res.status(201).json({
+        token,
+        user:newUser
+    });
 
     } catch (error) {
         console.error(error);

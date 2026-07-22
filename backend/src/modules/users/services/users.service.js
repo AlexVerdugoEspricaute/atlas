@@ -11,33 +11,34 @@ const bcrypt = require("bcryptjs");
 // ─────────────────────────────────────
 // CRUD USERS
 // ─────────────────────────────────────
-const getUsers = async()=>{
+const getUsers = async () => {
     const users =
         await usersRepository.findAll();
     return usersDTO(users);
 };
 
 
-const getUserById = async(id)=>{
+const getUserById = async (id) => {
     const user =
         await usersRepository.findById(id);
     return userDTO(user);
 };
 
 
-const createUser = async(data)=>{
+const createUser = async (data) => {
+
+    const email =
+        data.email.toLowerCase().trim();
 
     const existingUser =
-        await usersRepository.findByEmail(
-            data.email.toLowerCase().trim()
-        );
-    if(existingUser){
+        await usersRepository.findByEmail(email);
+
+    if (existingUser) {
         throw new Error("El correo ya está registrado");
     }
-
+    
     const newUser = {
-        email:
-            data.email.toLowerCase().trim(),
+        email,
         first_name:
             data.first_name.trim(),
         last_name:
@@ -49,14 +50,13 @@ const createUser = async(data)=>{
         role_id:
             await getDefaultRoleId()
     };
-    if(data.password){
+    if (data.password) {
         newUser.password_hash =
             await bcrypt.hash(
                 data.password,
                 10
             );
     }
-
     const user =
         await usersRepository.create(
             newUser
@@ -65,36 +65,42 @@ const createUser = async(data)=>{
 };
 
 
-const updateUser = async(id,data)=>{
+const updateUser = async (id, data) => {
 
     const allowedData = {};
-    if(typeof data.first_name==="string"){
+
+    if (typeof data.first_name === "string") {
         allowedData.first_name =
             data.first_name.trim();
     }
-    if(typeof data.last_name==="string"){
+    if (typeof data.last_name === "string") {
         allowedData.last_name =
             data.last_name.trim();
     }
-    if(typeof data.email==="string"){
+    if (typeof data.email === "string") {
         const email =
             data.email.toLowerCase().trim();
         const existingUser =
             await usersRepository.findByEmail(
                 email
             );
-        if(
+        if (
             existingUser &&
-            existingUser.id!==id
-        ){
-            throw new Error("El correo ya está registrado");
+            existingUser.id !== id
+        ) {
+            throw new Error(
+                "El correo ya está registrado"
+            );
         }
         allowedData.email =
             email;
     }
-    if(Object.keys(allowedData).length===0){
-        throw new Error("No hay campos válidos para actualizar");
+    if (Object.keys(allowedData).length === 0) {
+        throw new Error(
+            "No hay campos válidos para actualizar"
+        );
     }
+
     const user =
         await usersRepository.update(
             id,
@@ -104,35 +110,42 @@ const updateUser = async(id,data)=>{
 };
 
 
-const deleteUser = async(id,loggedUserId)=>{
-    if(id===loggedUserId){
-        throw new Error("No puedes desactivar tu propia cuenta");
+const deleteUser = async (
+    id,
+    loggedUserId
+) => {
+    if (id === loggedUserId) {
+        throw new Error(
+            "No puedes desactivar tu propia cuenta"
+        );
     }
-    return await usersRepository.deactivate(id);
+    const user =
+        await usersRepository.deactivate(id);
+    return userDTO(user);
 };
 
 
 // ─────────────────────────────────────
 // HELPERS
 // ─────────────────────────────────────
-const splitName = (fullName="")=>{
+const splitName = (fullName = "") => {
     const parts =
         fullName.trim().split(/\s+/);
-    if(parts.length===0){
+    if (parts.length === 0) {
         return {
-            first_name:"",
-            last_name:""
+            first_name: "",
+            last_name: ""
         };
     }
-    if(parts.length===1){
+    if (parts.length === 1) {
         return {
-            first_name:parts[0],
-            last_name:"-"
+            first_name: parts[0],
+            last_name: "-"
         };
     }
     return {
         first_name:
-            parts.slice(0,-1).join(" "),
+            parts.slice(0, -1).join(" "),
         last_name:
             parts.slice(-1).join(" ")
     };
@@ -142,25 +155,29 @@ const splitName = (fullName="")=>{
 // ─────────────────────────────────────
 // MICROSOFT AUTH
 // ─────────────────────────────────────
-const findOrCreateMicrosoftUser = async({azureOid,email,name})=>{
+const findOrCreateMicrosoftUser = async ({
+    azureOid,
+    email,
+    name
+}) => {
     let user =
         await usersRepository.findByEntraId(
             azureOid
         );
-    if(user){
+    if (user) {
         return userDTO(user);
     }
     user =
         await usersRepository.findByEmail(
-            email
+            email.toLowerCase()
         );
-    if(user){
+    if (user) {
         const updated =
             await usersRepository.update(
                 user.id,
                 {
-                    entra_id:azureOid,
-                    provider:"microsoft"
+                    entra_id: azureOid,
+                    provider: "microsoft"
                 }
             );
         return userDTO(updated);
@@ -169,21 +186,19 @@ const findOrCreateMicrosoftUser = async({azureOid,email,name})=>{
     const {
         first_name,
         last_name
-    } =
-    splitName(name);
+    } = splitName(name);
 
-    const roleId =
-        await getDefaultRoleId();
+    const roleId = await getDefaultRoleId();
 
     const newUser =
         await usersRepository.create({
-            entra_id:azureOid,
-            email,
+            entra_id: azureOid,
+            email: email.toLowerCase(),
             first_name,
             last_name,
-            role_id:roleId,
-            provider:"microsoft",
-            is_active:true
+            role_id: roleId,
+            provider: "microsoft",
+            is_active: true
         });
     return userDTO(newUser);
 };
@@ -192,16 +207,24 @@ const findOrCreateMicrosoftUser = async({azureOid,email,name})=>{
 // ─────────────────────────────────────
 // LOCAL LOGIN
 // ─────────────────────────────────────
-const loginWithCredentials = async(email,password)=>{
+const loginWithCredentials = async (
+    email,
+    password
+) => {
     const user =
         await usersRepository.findAuthUserByEmail(
-            email
+            email.toLowerCase()
         );
-    if(
+    if (
         !user ||
         !user.password_hash
-    ){
+    ) {
         return null;
+    }
+    if (!user.is_active) {
+        throw new Error(
+            "Cuenta desactivada"
+        );
     }
 
     const valid =
@@ -209,7 +232,7 @@ const loginWithCredentials = async(email,password)=>{
             password,
             user.password_hash
         );
-    if(!valid){
+    if (!valid) {
         return null;
     }
     return userDTO(user);
@@ -219,12 +242,12 @@ const loginWithCredentials = async(email,password)=>{
 // ─────────────────────────────────────
 // REGISTER LOCAL
 // ─────────────────────────────────────
-const registerLocalUser = async({
+const registerLocalUser = async ({
     email,
     password,
     first_name,
     last_name
-})=>{
+}) => {
     email =
         email.toLowerCase().trim();
 
@@ -233,8 +256,10 @@ const registerLocalUser = async({
             email
         );
 
-    if(existingUser){
-        throw new Error("El correo ya está registrado");
+    if (existingUser) {
+        throw new Error(
+            "El correo ya está registrado"
+        );
     }
 
     const password_hash =
@@ -243,20 +268,61 @@ const registerLocalUser = async({
             10
         );
 
-    const roleId =
-        await getDefaultRoleId();
+    const roleId = await getDefaultRoleId();
 
     const user =
         await usersRepository.create({
             email,
             password_hash,
-            first_name:first_name.trim(),
-            last_name:last_name.trim(),
-            role_id:roleId,
-            provider:"local",
-            is_active:true
+            first_name:
+                first_name.trim(),
+            last_name:
+                last_name.trim(),
+            role_id: roleId,
+            provider: "local",
+            is_active: true
         });
+    return userDTO(user);
+};
 
+
+// ─────────────────────────────────────
+// REACTIVATE LOCAL USER
+// ─────────────────────────────────────
+const reactivateLocalUser = async (
+    id,
+    {
+        email,
+        password,
+        first_name,
+        last_name
+    }
+) => {
+    const password_hash =
+        await bcrypt.hash(
+            password,
+            10
+        );
+
+    const user =
+        await usersRepository.update(
+            id,
+            {
+                email:
+                    email.toLowerCase().trim(),
+                password_hash,
+                first_name:
+                    first_name.trim(),
+                last_name:
+                    last_name.trim(),
+                provider:
+                    "local",
+                entra_id:
+                    null,
+                is_active:
+                    true
+            }
+        );
     return userDTO(user);
 };
 
@@ -264,7 +330,7 @@ const registerLocalUser = async({
 // ─────────────────────────────────────
 // PRIVATE
 // ─────────────────────────────────────
-async function getDefaultRoleId(){
+const getDefaultRoleId = async () => {
     return await usersRepository.getDefaultRoleId();
 };
 
@@ -272,12 +338,14 @@ async function getDefaultRoleId(){
 // ─────────────────────────────────────
 // LOOKUP
 // ─────────────────────────────────────
-const findByEmail = async(email)=>{
-    return await usersRepository.findByEmail(email);
+const findByEmail = async (email) => {
+    return await usersRepository.findByEmail(
+        email.toLowerCase().trim()
+    );
 };
 
 
-module.exports={
+module.exports = {
     getUsers,
     getUserById,
     createUser,
@@ -286,5 +354,6 @@ module.exports={
     findOrCreateMicrosoftUser,
     loginWithCredentials,
     registerLocalUser,
+    reactivateLocalUser,
     findByEmail
 };
